@@ -4,8 +4,8 @@
 %{?!_with_unstable: %{error:%(echo -e "\n\n\nYou are building package for a stable release, please see \nhttp://qa.mandrakesoft.com/twiki/bin/view/Main/DistroSpecificReleaseTag\nif you think this is incorrect\n\n\n ")}%(sleep 2)}
 
 %define name shorewall
-%define version_major 3.2
-%define version_minor 9
+%define version_major 3.4
+%define version_minor 3
 %define version %{version_major}.%{version_minor}
 %define release %mkrel 1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
@@ -106,6 +106,8 @@ fi
 %attr(0640,root,root) %{_datadir}/%{name}/*
 %attr(0700,root,root) %dir %{_var}/lib/%{name}
 %attr(540,root,root) /sbin/shorewall
+%{_mandir}/man5/*.5*
+%{_mandir}/man8/*.8*
 
 %files doc 
 %doc %attr(-,root,root) documentation/*
