@@ -5,7 +5,7 @@
 
 %define name shorewall
 %define version_major 3.4
-%define version_minor 3
+%define version_minor 4
 %define version %{version_major}.%{version_minor}
 %define release %mkrel 1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
@@ -111,5 +111,3 @@ fi
 
 %files doc 
 %doc %attr(-,root,root) documentation/*
-
-
