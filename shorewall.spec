@@ -10,24 +10,24 @@
 %define release %mkrel 1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
-Summary: Shoreline Firewall is an iptables-based firewall for Linux systems
-Name: %{name}
-Version: %{version}
-Release: %{release}
-Source0: %ftp_path/%{name}-%{version}.tar.bz2
-Source2: %ftp_path/%{version}.sha1sums
-Source3: %{name}-init.sh
-Source4: %ftp_path/%{name}-docs-html-%{version}.tar.bz2
+Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
+Name:		%{name}
+Version:	%{version}
+Release:	%{release}
+Source0:	%ftp_path/%{name}-%{version}.tar.bz2
+Source2:	%ftp_path/%{version}.sha1sums
+Source3:	%{name}-init.sh
+Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 # %{ftp_path}/errata/firewall
 # Source11: shorewall-firewall
-License: GPL
-Group: System/Servers
-URL: http://www.shorewall.net/
-BuildArch: noarch
-Requires: iptables
-BuildRoot: %{_tmppath}/%{name}-buildroot
-BuildConflicts: apt-common
-Requires(post): rpm-helper
+License:	GPL
+Group:		System/Servers
+URL:		http://www.shorewall.net/
+BuildArch:	noarch
+Requires:	iptables
+BuildRoot:	%{_tmppath}/%{name}-buildroot
+BuildConflicts:	apt-common
+Requires(post):	rpm-helper
 Requires(preun): rpm-helper
 
 %description
@@ -36,8 +36,8 @@ The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
 a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 
 %package doc
-Summary:  Firewall scripts
-Group:    System/Servers
+Summary:	Firewall scripts
+Group:		System/Servers
 
 %description doc 
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
@@ -79,12 +79,12 @@ export GROUP=`id -n -g`
 # startup script by RPM. This automatic replacement is broken.
 export DONT_GPRINTIFY=1
 
-install -d -m 0755 $RPM_BUILD_ROOT/%{_initrddir}
-mv -f $RPM_BUILD_ROOT/etc/init.d/shorewall $RPM_BUILD_ROOT/%{_initrddir}/shorewall
+install -d -m 0755 %{buildroot}/%{_initrddir}
+mv -f %{buildroot}/etc/init.d/shorewall %{buildroot}%{_initrddir}/shorewall
 
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 %_post_service shorewall
@@ -101,7 +101,6 @@ fi
 %doc %attr(-,root,root) COPYING INSTALL changelog.txt releasenotes.txt tunnel ipsecvpn Samples
 %attr(700,root,root) %dir /etc/shorewall
 %attr(750,root,root) %{_initrddir}/shorewall
-
 %attr(0640,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(0640,root,root) %{_datadir}/%{name}/*
 %attr(0700,root,root) %dir %{_var}/lib/%{name}
