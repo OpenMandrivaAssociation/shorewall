@@ -5,9 +5,9 @@
 
 %define name shorewall
 %define version_major 3.4
-%define version_minor 4
+%define version_minor 6
 %define version %{version_major}.%{version_minor}
-%define release %mkrel 2
+%define release %mkrel 1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
