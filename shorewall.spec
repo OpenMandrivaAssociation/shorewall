@@ -25,7 +25,6 @@ Group:		System/Servers
 URL:		http://www.shorewall.net/
 BuildArch:	noarch
 Requires:	iptables
-BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildConflicts:	apt-common
 Requires(post):	rpm-helper
 Requires(preun): rpm-helper
