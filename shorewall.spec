@@ -227,7 +227,7 @@ fi
 
 %files perl
 %defattr(-,root,root)
-%doc %{name}-perl-%{version}/*.txt
+%doc %{name}-perl-%{perl_ver}/*.txt
 %dir %{_datadir}/%{name}-perl
 %{_datadir}/%{name}-perl/Shorewall/*.pm
 %{_datadir}/%{name}-perl/compiler.pl
@@ -238,7 +238,7 @@ fi
 
 %files shell
 %defattr(-,root,root)
-%doc %{name}-shell-%{version}/*.txt
+%doc %{name}-shell-%{shell_ver}/*.txt
 %dir %{_datadir}/%{name}-shell
 %{_datadir}/%{name}-shell/compiler
 %{_datadir}/%{name}-shell/lib.*
