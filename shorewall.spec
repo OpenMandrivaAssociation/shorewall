@@ -137,7 +137,9 @@ export DONT_GPRINTIFY=1
 
 #(tpg) looks like these files are needed
 install -d %{buildroot}/%{_localstatedir}/lib/shorewall
+install -d %{buildroot}/%{_localstatedir}/lib/shorewall-lite
 touch %{buildroot}/%{_localstatedir}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir}
+touch %{buildroot}/%{_localstatedir}/lib/shorewall-lite/firewall
 
 %clean
 rm -rf %{buildroot}
@@ -163,6 +165,8 @@ fi
 %dir %{_localstatedir}/lib/shorewall
 %ghost %{_localstatedir}/lib/shorewall/*
 %ghost %{_localstatedir}/lib/shorewall/.*
+%ghost %{_localstatedir}/lib/shorewall-lite/*
+%ghost %{_localstatedir}/lib/shorewall-lite/.
 %{_initrddir}/shorewall
 %config(noreplace) %{_sysconfdir}/%{name}/*
 /sbin/shorewall
@@ -212,6 +216,9 @@ fi
 %defattr(-,root,root)
 %doc %{name}-lite-%{version}/*.txt
 %dir %{_datadir}/%{name}-lite
+%dir %{_localstatedir}/lib/shorewall-lite
+%ghost %{_localstatedir}/lib/shorewall-lite/*
+%ghost %{_localstatedir}/lib/shorewall-lite/.
 %{_initrddir}/shorewall-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
 /sbin/shorewall-lite
