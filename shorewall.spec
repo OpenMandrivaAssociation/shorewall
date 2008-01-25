@@ -8,7 +8,7 @@
 Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -18,14 +18,15 @@ Source2:	%ftp_path/%{name}-perl-%{perl_ver}.tar.bz2
 Source3:	%ftp_path/%{name}-shell-%{shell_ver}.tar.bz2
 Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source5:	%ftp_path/%{version}.sha1sums
-BuildArch:	noarch
-Requires:	iptables
+Patch0:		shorewall-common-4.0.7-init-script.patch
+Patch1:		shorewall-lite-4.0.7-init-script.patch
+Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-lite = %{version}-%{release}
 Requires:	%{name}-perl = %{version}-%{release}
 Requires:	%{name}-shell = %{version}-%{release}
 BuildConflicts:	apt-common
-Requires(post):	rpm-helper
-Requires(preun): rpm-helper
+BuildArch:	noarch
+BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 %description
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
@@ -35,6 +36,10 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 %package common
 Summary:	Common shorewall files
 Group:		System/Servers
+Requires:	iptables
+Requires:	iproute
+Requires(post):	rpm-helper
+Requires(preun): rpm-helper
 
 %description common
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
@@ -43,13 +48,16 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 
 Shorewall offers two alternative firewall compilers, shorewall-perl and
 shorewall-shell. The shorewall-perl compilers is suggested for new installed
-systems and shorewall-shell is provided for backwards compability and smooth
+systems and shorewall-shell is provided for backwards compatibility and smooth
 legacy system upgrades because shorewall perl is not fully compatible with
 all legacy configurations.
 
 %package lite
 Summary:	A lite version of shorewall
 Group:		System/Servers
+Requires:	%{name}-common = %{version}-%{release}
+Requires(post):	rpm-helper
+Requires(preun): rpm-helper
 
 %description lite
 Shorewall Lite is a companion product to Shorewall that allows network
@@ -58,6 +66,10 @@ administrators to centralize the configuration of Shorewall-based firewalls.
 %package perl
 Summary:	Perl compiler for shorewall
 Group:		System/Servers
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	perl
+Requires(post):	rpm-helper
+Requires(preun): rpm-helper
 
 %description perl
 Shorewall-perl is a part of Shorewall that allows faster compilation and
@@ -66,9 +78,12 @@ execution than the legacy shorewall-shell compiler.
 %package shell
 Summary:	Shell compiler for shorewall
 Group:		System/Servers
+Requires:	%{name}-common = %{version}-%{release}
+Requires(post):	rpm-helper
+Requires(preun): rpm-helper
 
 %description shell
-Shorewall-shell is a part of Shorewall that alows running shorewall with
+Shorewall-shell is a part of Shorewall that allows running shorewall with
 legacy configurations. Shorewall-perl is the preferred compiler, please use
 it for new installations.
 
@@ -90,6 +105,14 @@ This package contains the docs.
 %setup -q -T -D -a 3
 %setup -q -T -D -a 4
 
+pushd %{name}-common-%{version}
+%patch0 -p1 -b .init
+popd
+
+pushd %{name}-lite-%{version}
+%patch1 -p1 -b .initlite
+popd
+
 %build
 
 %install
@@ -97,6 +120,7 @@ rm -rf %{buildroot}
 export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
+export DEST=%{_initrddir}
 
 mkdir -p %{buildroot}%{_initrddir}
 
@@ -112,15 +136,10 @@ perl -pi -e 's/TC_ENABLED=Internal/TC_ENABLED=/' %{name}.conf
 
 ./install.sh -n
 
-#(tpg) move initscript to the right place
-mv -f %{buildroot}/etc/init.d/shorewall %{buildroot}%{_initrddir}/shorewall
 popd
 
 pushd %{name}-lite-%{version}
 ./install.sh -n
-
-#(tpg) move initscript to the right place
-mv -f %{buildroot}/etc/init.d/shorewall-lite %{buildroot}%{_initrddir}/shorewall-lite
 popd
 
 pushd %{name}-perl-%{perl_ver}
@@ -144,15 +163,34 @@ touch %{buildroot}/%{_localstatedir}/lib/shorewall-lite/firewall
 %clean
 rm -rf %{buildroot}
 
-%post
+%post common
 %_post_service shorewall
 
-%preun
+%create_ghostfile %{_localstatedir}/lib/shorewall/chains
+%create_ghostfile %{_localstatedir}/lib/shorewall/nat
+%create_ghostfile %{_localstatedir}/lib/shorewall/proxyarp
+%create_ghostfile %{_localstatedir}/lib/shorewall/restarted
+%create_ghostfile %{_localstatedir}/lib/shorewall/zones
+%create_ghostfile %{_localstatedir}/lib/shorewall/restore-base
+%create_ghostfile %{_localstatedir}/lib/shorewall/restore-tail
+%create_ghostfile %{_localstatedir}/lib/shorewall/state
+%create_ghostfile %{_localstatedir}/lib/shorewall/.modules
+%create_ghostfile %{_localstatedir}/lib/shorewall/.modulesdir
+
+%preun common
 %_preun_service shorewall
 if [ $1 = 0 ] ; then
   %{__rm} -f %{_sysconfdir}/%{name}/startup_disabled
   %{__rm} -f %{_var}/lib/%{name}/*
 fi
+
+%post lite
+%_post_service shorewall-lite
+
+%create_ghostfile %{_localstatedir}/lib/shorewall-lite/firewall
+
+%preun lite
+%_preun_service shorewall-lite
 
 %files
 %defattr(-,root,root)
@@ -162,14 +200,12 @@ fi
 %doc %{name}-common-%{version}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
-%dir %{_localstatedir}/lib/shorewall
+%ghost %dir %attr(755,root,root) %{_localstatedir}/lib/shorewall
 %ghost %{_localstatedir}/lib/shorewall/*
 %ghost %{_localstatedir}/lib/shorewall/.*
-%ghost %{_localstatedir}/lib/shorewall-lite/*
-%ghost %{_localstatedir}/lib/shorewall-lite/.
-%{_initrddir}/shorewall
+%attr(700,root,root) %{_initrddir}/shorewall
 %config(noreplace) %{_sysconfdir}/%{name}/*
-/sbin/shorewall
+%attr(755,root,root) /sbin/shorewall
 %{_datadir}/shorewall/action*
 %{_datadir}/shorewall/configfiles/*
 %{_datadir}/shorewall/configpath
@@ -216,12 +252,12 @@ fi
 %defattr(-,root,root)
 %doc %{name}-lite-%{version}/*.txt
 %dir %{_datadir}/%{name}-lite
-%dir %{_localstatedir}/lib/shorewall-lite
+%ghost %dir %attr(755,root,root) %{_localstatedir}/lib/shorewall-lite
 %ghost %{_localstatedir}/lib/shorewall-lite/*
-%ghost %{_localstatedir}/lib/shorewall-lite/.
-%{_initrddir}/shorewall-lite
+%ghost %{_localstatedir}/lib/shorewall-lite/.*
+%attr(700,root,root) %{_initrddir}/shorewall-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
-/sbin/shorewall-lite
+%attr(755,root,root) /sbin/shorewall-lite
 %{_datadir}/shorewall-lite/configpath
 %{_datadir}/shorewall-lite/functions
 %{_datadir}/shorewall-lite/lib.*
@@ -236,6 +272,7 @@ fi
 %defattr(-,root,root)
 %doc %{name}-perl-%{perl_ver}/*.txt
 %dir %{_datadir}/%{name}-perl
+%dir %{_datadir}/%{name}-perl/Shorewall
 %{_datadir}/%{name}-perl/Shorewall/*.pm
 %{_datadir}/%{name}-perl/compiler.pl
 %{_datadir}/%{name}-perl/prog.footer
