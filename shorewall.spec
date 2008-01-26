@@ -8,7 +8,7 @@
 Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -21,9 +21,7 @@ Source5:	%ftp_path/%{version}.sha1sums
 Patch0:		shorewall-common-4.0.7-init-script.patch
 Patch1:		shorewall-lite-4.0.7-init-script.patch
 Requires:	%{name}-common = %{version}-%{release}
-Requires:	%{name}-lite = %{version}-%{release}
 Requires:	%{name}-perl = %{version}-%{release}
-Requires:	%{name}-shell = %{version}-%{release}
 BuildConflicts:	apt-common
 BuildArch:	noarch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
@@ -37,7 +35,7 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 Summary:	Common shorewall files
 Group:		System/Servers
 Requires:	iptables
-Requires:	iproute
+Requires:	iproute2
 Requires(post):	rpm-helper
 Requires(preun): rpm-helper
 
@@ -114,6 +112,7 @@ pushd %{name}-lite-%{version}
 popd
 
 %build
+# (tpg) we do nothing here
 
 %install
 rm -rf %{buildroot}
@@ -121,8 +120,6 @@ export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
 export DEST=%{_initrddir}
-
-mkdir -p %{buildroot}%{_initrddir}
 
 pushd %{name}-common-%{version}
 # (blino) enable startup (new setting as of 2.1.3)
@@ -134,6 +131,13 @@ perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name}.conf
 # blank Internal option 
 perl -pi -e 's/TC_ENABLED=Internal/TC_ENABLED=/' %{name}.conf
 
+# (tpg) use perl compiler
+perl -pi -e 's/SHOREWALL_COMPILER=.*/SHOREWALL_COMPILER=perl/' %{name}.conf
+
+# (tpg) do the optimizations
+perl -pi -e 's/OPTIMIZE=.*/OPTIMIZE=1/' %{name}.conf
+
+# let's do the install
 ./install.sh -n
 
 popd
