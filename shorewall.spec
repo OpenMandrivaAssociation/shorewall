@@ -120,6 +120,7 @@ export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
 export DEST=%{_initrddir}
+export CONFDIR=%{_sysconfdir}/%{name}
 
 pushd %{name}-common-%{version}
 # (blino) enable startup (new setting as of 2.1.3)
@@ -136,6 +137,9 @@ perl -pi -e 's/SHOREWALL_COMPILER=.*/SHOREWALL_COMPILER=perl/' %{name}.conf
 
 # (tpg) do the optimizations
 perl -pi -e 's/OPTIMIZE=.*/OPTIMIZE=1/' %{name}.conf
+
+# (tpg) set config path
+perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=%{_sysconfdir}/%{name}#' configpath
 
 # let's do the install
 ./install.sh -n
@@ -211,7 +215,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/shorewall
 %{_datadir}/shorewall/action*
-%{_datadir}/shorewall/configfiles/*
+%exclude %{_datadir}/shorewall/configfiles/*
 %{_datadir}/shorewall/configpath
 %{_datadir}/shorewall/firewall
 %{_datadir}/shorewall/functions
