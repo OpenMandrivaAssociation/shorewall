@@ -8,7 +8,7 @@
 Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -165,7 +165,7 @@ export DONT_GPRINTIFY=1
 #(tpg) looks like these files are needed
 install -d %{buildroot}/%{_localstatedir}/lib/shorewall
 install -d %{buildroot}/%{_localstatedir}/lib/shorewall-lite
-touch %{buildroot}/%{_localstatedir}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir}
+touch %{buildroot}/%{_localstatedir}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
 touch %{buildroot}/%{_localstatedir}/lib/shorewall-lite/firewall
 
 %clean
@@ -174,16 +174,20 @@ rm -rf %{buildroot}
 %post common
 %_post_service shorewall
 
-%create_ghostfile %{_localstatedir}/lib/shorewall/chains
-%create_ghostfile %{_localstatedir}/lib/shorewall/nat
-%create_ghostfile %{_localstatedir}/lib/shorewall/proxyarp
-%create_ghostfile %{_localstatedir}/lib/shorewall/restarted
-%create_ghostfile %{_localstatedir}/lib/shorewall/zones
-%create_ghostfile %{_localstatedir}/lib/shorewall/restore-base
-%create_ghostfile %{_localstatedir}/lib/shorewall/restore-tail
-%create_ghostfile %{_localstatedir}/lib/shorewall/state
-%create_ghostfile %{_localstatedir}/lib/shorewall/.modules
-%create_ghostfile %{_localstatedir}/lib/shorewall/.modulesdir
+%create_ghostfile %{_localstatedir}/lib/shorewall/chains root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/nat root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/proxyarp root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/restarted root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/zones root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/restore-base root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/restore-tail root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/state root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/.modules root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/.modulesdir root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/.iptables-restore-input root root 644
+%create_ghostfile %{_localstatedir}/lib/shorewall/.restart root root 700
+%create_ghostfile %{_localstatedir}/lib/shorewall/.restore root root 700
+%create_ghostfile %{_localstatedir}/lib/shorewall/.start root root 700
 
 %preun common
 %_preun_service shorewall
