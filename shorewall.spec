@@ -8,7 +8,7 @@
 Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -165,8 +165,8 @@ export DONT_GPRINTIFY=1
 #(tpg) looks like these files are needed
 install -d %{buildroot}/%{_localstatedir}/lib/shorewall
 install -d %{buildroot}/%{_localstatedir}/lib/shorewall-lite
-touch %{buildroot}/%{_localstatedir}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
-touch %{buildroot}/%{_localstatedir}/lib/shorewall-lite/firewall
+touch %{buildroot}/%{_localstatedir}/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
+touch %{buildroot}/%{_localstatedir}/shorewall-lite/firewall
 
 %clean
 rm -rf %{buildroot}
@@ -174,20 +174,20 @@ rm -rf %{buildroot}
 %post common
 %_post_service shorewall
 
-%create_ghostfile %{_localstatedir}/lib/shorewall/chains root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/nat root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/proxyarp root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/restarted root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/zones root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/restore-base root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/restore-tail root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/state root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.modules root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.modulesdir root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.iptables-restore-input root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.restart root root 700
-%create_ghostfile %{_localstatedir}/lib/shorewall/.restore root root 700
-%create_ghostfile %{_localstatedir}/lib/shorewall/.start root root 700
+%create_ghostfile %{_localstatedir}/shorewall/chains root root 644
+%create_ghostfile %{_localstatedir}/shorewall/nat root root 644
+%create_ghostfile %{_localstatedir}/shorewall/proxyarp root root 644
+%create_ghostfile %{_localstatedir}/shorewall/restarted root root 644
+%create_ghostfile %{_localstatedir}/shorewall/zones root root 644
+%create_ghostfile %{_localstatedir}/shorewall/restore-base root root 644
+%create_ghostfile %{_localstatedir}/shorewall/restore-tail root root 644
+%create_ghostfile %{_localstatedir}/shorewall/state root root 644
+%create_ghostfile %{_localstatedir}/shorewall/.modules root root 644
+%create_ghostfile %{_localstatedir}/shorewall/.modulesdir root root 644
+%create_ghostfile %{_localstatedir}/shorewall/.iptables-restore-input root root 644
+%create_ghostfile %{_localstatedir}/shorewall/.restart root root 700
+%create_ghostfile %{_localstatedir}/shorewall/.restore root root 700
+%create_ghostfile %{_localstatedir}/shorewall/.start root root 700
 
 %preun common
 %_preun_service shorewall
@@ -199,7 +199,7 @@ fi
 %post lite
 %_post_service shorewall-lite
 
-%create_ghostfile %{_localstatedir}/lib/shorewall-lite/firewall
+%create_ghostfile %{_localstatedir}/shorewall-lite/firewall
 
 %preun lite
 %_preun_service shorewall-lite
@@ -212,9 +212,9 @@ fi
 %doc %{name}-common-%{version}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
-%ghost %dir %attr(755,root,root) %{_localstatedir}/lib/shorewall
-%ghost %{_localstatedir}/lib/shorewall/*
-%ghost %{_localstatedir}/lib/shorewall/.*
+%ghost %dir %attr(755,root,root) %{_localstatedir}/shorewall
+%ghost %{_localstatedir}/shorewall/*
+%ghost %{_localstatedir}/shorewall/.*
 %attr(700,root,root) %{_initrddir}/shorewall
 %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/shorewall
@@ -264,9 +264,9 @@ fi
 %defattr(-,root,root)
 %doc %{name}-lite-%{version}/*.txt
 %dir %{_datadir}/%{name}-lite
-%ghost %dir %attr(755,root,root) %{_localstatedir}/lib/shorewall-lite
-%ghost %{_localstatedir}/lib/shorewall-lite/*
-%ghost %{_localstatedir}/lib/shorewall-lite/.*
+%ghost %dir %attr(755,root,root) %{_localstatedir}/shorewall-lite
+%ghost %{_localstatedir}/shorewall-lite/*
+%ghost %{_localstatedir}/shorewall-lite/.*
 %attr(700,root,root) %{_initrddir}/shorewall-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
 %attr(755,root,root) /sbin/shorewall-lite
