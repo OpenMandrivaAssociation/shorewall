@@ -5,7 +5,7 @@
 %define perl_ver %{version}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
-Summary:	Shoreline Firewall is an iptables-based firewall for Linux systems
+Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
 Release:	%mkrel 3
@@ -51,7 +51,7 @@ legacy system upgrades because shorewall perl is not fully compatible with
 all legacy configurations.
 
 %package lite
-Summary:	A lite version of shorewall
+Summary:	Lite version of shorewall
 Group:		System/Servers
 Requires:	%{name}-common = %{version}-%{release}
 Requires(post):	rpm-helper
