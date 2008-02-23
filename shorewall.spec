@@ -8,7 +8,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 4
+Release:	%mkrel 5
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -38,6 +38,7 @@ Requires:	iptables
 Requires:	iproute2
 Requires(post):	rpm-helper
 Requires(preun): rpm-helper
+Conflicts:	shorewall < 4.0.7-1
 
 %description common
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
