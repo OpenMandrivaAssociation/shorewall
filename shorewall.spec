@@ -214,7 +214,7 @@ fi
 %doc %{name}-common-%{version}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
-%ghost %dir %attr(755,root,root) %{_localstatedir}/shorewall
+%dir %attr(755,root,root) %{_localstatedir}/shorewall
 %ghost %{_localstatedir}/shorewall/*
 %ghost %{_localstatedir}/shorewall/.??*
 %attr(700,root,root) %{_initrddir}/shorewall
@@ -266,7 +266,7 @@ fi
 %defattr(-,root,root)
 %doc %{name}-lite-%{version}/*.txt
 %dir %{_datadir}/%{name}-lite
-%ghost %dir %attr(755,root,root) %{_localstatedir}/shorewall-lite
+%dir %attr(755,root,root) %{_localstatedir}/shorewall-lite
 %ghost %{_localstatedir}/shorewall-lite/*
 %attr(700,root,root) %{_initrddir}/shorewall-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
