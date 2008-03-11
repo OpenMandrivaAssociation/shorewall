@@ -216,7 +216,7 @@ fi
 %dir %{_datadir}/%{name}
 %ghost %dir %attr(755,root,root) %{_localstatedir}/shorewall
 %ghost %{_localstatedir}/shorewall/*
-%ghost %{_localstatedir}/shorewall/.*
+%ghost %{_localstatedir}/shorewall/.??*
 %attr(700,root,root) %{_initrddir}/shorewall
 %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/shorewall
@@ -268,7 +268,6 @@ fi
 %dir %{_datadir}/%{name}-lite
 %ghost %dir %attr(755,root,root) %{_localstatedir}/shorewall-lite
 %ghost %{_localstatedir}/shorewall-lite/*
-%ghost %{_localstatedir}/shorewall-lite/.*
 %attr(700,root,root) %{_initrddir}/shorewall-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
 %attr(755,root,root) /sbin/shorewall-lite
