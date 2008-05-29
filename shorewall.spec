@@ -9,7 +9,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -36,6 +36,7 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 Summary:	Common shorewall files
 Group:		System/Servers
 Requires:	iptables
+Requires:	iptables-ipv6
 Requires:	iproute2
 Requires(post):	rpm-helper
 Requires(preun): rpm-helper
