@@ -166,8 +166,6 @@ popd
 export DONT_GPRINTIFY=1
 
 #(tpg) looks like these files are needed
-install -d %{buildroot}/%{_localstatedir}/lib/lib/shorewall
-install -d %{buildroot}/%{_localstatedir}/lib/lib/shorewall-lite
 touch %{buildroot}/%{_localstatedir}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
 touch %{buildroot}/%{_localstatedir}/lib/shorewall-lite/firewall
 
