@@ -1,8 +1,8 @@
 %define version_major 4.0
-%define version_minor 11
+%define version_minor 13
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}.1
+%define perl_ver %{version}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 Summary:	Iptables-based firewall for Linux systems
