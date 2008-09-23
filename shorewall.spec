@@ -8,7 +8,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 4
+Release:	%mkrel 5
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -20,8 +20,6 @@ Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source5:	%ftp_path/%{version}.sha1sums
 Patch0:		shorewall-common-4.0.7-init-script.patch
 Patch1:		shorewall-lite-4.0.7-init-script.patch
-Patch2:		shorewall-common-iptables_check.diff
-Patch3:		shorewall-lite-iptables_check.diff
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-perl = %{version}-%{release}
 BuildConflicts:	apt-common
@@ -109,12 +107,10 @@ This package contains the docs.
 
 pushd %{name}-common-%{version}
 %patch0 -p1 -b .init
-%patch2 -p0 -b .iptables_check
 popd
 
 pushd %{name}-lite-%{version}
 %patch1 -p1 -b .initlite
-%patch3 -p0 -b .iptables_check
 popd
 
 %build
