@@ -8,7 +8,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -139,6 +139,9 @@ perl -pi -e 's/SHOREWALL_COMPILER=.*/SHOREWALL_COMPILER=perl/' %{name}.conf
 
 # (tpg) do the optimizations
 perl -pi -e 's/OPTIMIZE=.*/OPTIMIZE=1/' %{name}.conf
+
+# (tpg) enable IPv6
+perl -pi -e 's#DISABLE_IPV6=.*#DISABLE_IPV6=No#' %{name}.conf
 
 # (tpg) set config path
 perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=%{_sysconfdir}/%{name}#' configpath
