@@ -1,5 +1,5 @@
-%define version_major 4.0
-%define version_minor 13
+%define version_major 4.2
+%define version_minor 0
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
 %define perl_ver %{version}
@@ -8,7 +8,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 5
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -251,6 +251,7 @@ fi
 %{_mandir}/man5/shorewall-rules.5.*
 %{_mandir}/man5/shorewall-tcclasses.5.*
 %{_mandir}/man5/shorewall-tcdevices.5.*
+%{_mandir}/man5/shorewall-tcfilters.5.*
 %{_mandir}/man5/shorewall-tcrules.5.*
 %{_mandir}/man5/shorewall-tos.5.*
 %{_mandir}/man5/shorewall-tunnels.5.*
