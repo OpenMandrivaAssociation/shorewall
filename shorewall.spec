@@ -1,9 +1,14 @@
+%define debug_package %{nil}
+
 %define version_major 4.2
-%define version_minor 2
+%define version_minor 4
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}
+%define perl_ver %{version}.5
+%define ipv6_ver %{version}.1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
+
+%define name6 %{name}6
 
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
@@ -17,9 +22,13 @@ Source1:	%ftp_path/%{name}-lite-%{version}.tar.bz2
 Source2:	%ftp_path/%{name}-perl-%{perl_ver}.tar.bz2
 Source3:	%ftp_path/%{name}-shell-%{shell_ver}.tar.bz2
 Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
-Source5:	%ftp_path/%{version}.sha1sums
-Patch0:		shorewall-common-4.0.7-init-script.patch
-Patch1:		shorewall-lite-4.0.7-init-script.patch
+Source5:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
+Source6:	%ftp_path/%{name6}-lite-%{ipv6_ver}.tar.bz2
+Source7:	%ftp_path/%{version}.sha1sums
+Patch0:		%{name}-common-4.2.4-init-script.patch
+Patch1:		%{name}-lite-4.2.4-init-script.patch
+Patch2:		%{name6}-4.2.4.1-init-script.patch
+Patch3:		%{name6}-lite-4.2.4.1-init-script.patch
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-perl = %{version}-%{release}
 BuildConflicts:	apt-common
@@ -34,11 +43,10 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 %package common
 Summary:	Common shorewall files
 Group:		System/Servers
-Requires:	iptables
-Requires:	iptables-ipv6
+Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires(post):	rpm-helper
-Requires(preun): rpm-helper
+Requires(preun):	rpm-helper
 Conflicts:	shorewall < 4.0.7-1
 
 %description common
@@ -46,18 +54,40 @@ The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
 (iptables) based firewall that can be used on a dedicated firewall system,
 a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 
-Shorewall offers two alternative firewall compilers, shorewall-perl and
-shorewall-shell. The shorewall-perl compilers is suggested for new installed
-systems and shorewall-shell is provided for backwards compatibility and smooth
-legacy system upgrades because shorewall perl is not fully compatible with
-all legacy configurations.
+Notice:
+If you want control IPv6 connections, please make sure that shorewall-ipv6 
+is installed on your system.
+
+%package ipv6
+Summary:	IPv6 capable Shorewall
+Group:		System/Servers
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	iptables-ipv6
+Requires:	iproute2
+Requires(post):	rpm-helper
+Requires(preun):	rpm-helper
+
+%description ipv6
+An IPv6 enabled and capable Shoreline Firewall.
+
+%package ipv6-lite
+Summary:	Lite version of ipv6 shorewall
+Group:		System/Servers
+Requires:	%{name6} = %{version}-%{release}
+Requires(post):	rpm-helper
+Requires(preun): rpm-helper
+
+%description ipv6-lite
+Shorewall IPv6 Lite is a companion product to Shorewall IPv6 that allows 
+network administrators to centralize the configuration of Shorewall-based
+firewalls.
 
 %package lite
 Summary:	Lite version of shorewall
 Group:		System/Servers
 Requires:	%{name}-common = %{version}-%{release}
 Requires(post):	rpm-helper
-Requires(preun): rpm-helper
+Requires(preun):	rpm-helper
 
 %description lite
 Shorewall Lite is a companion product to Shorewall that allows network
@@ -68,8 +98,6 @@ Summary:	Perl compiler for shorewall
 Group:		System/Servers
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	perl
-Requires(post):	rpm-helper
-Requires(preun): rpm-helper
 
 %description perl
 Shorewall-perl is a part of Shorewall that allows faster compilation and
@@ -79,8 +107,6 @@ execution than the legacy shorewall-shell compiler.
 Summary:	Shell compiler for shorewall
 Group:		System/Servers
 Requires:	%{name}-common = %{version}-%{release}
-Requires(post):	rpm-helper
-Requires(preun): rpm-helper
 
 %description shell
 Shorewall-shell is a part of Shorewall that allows running shorewall with
@@ -104,6 +130,8 @@ This package contains the docs.
 %setup -q -T -D -a 2
 %setup -q -T -D -a 3
 %setup -q -T -D -a 4
+%setup -q -T -D -a 5
+%setup -q -T -D -a 6
 
 pushd %{name}-common-%{version}
 %patch0 -p1 -b .init
@@ -111,6 +139,14 @@ popd
 
 pushd %{name}-lite-%{version}
 %patch1 -p1 -b .initlite
+popd
+
+pushd %{name6}-%{ipv6_ver}
+%patch2 -p1 -b .init6
+popd
+
+pushd %{name6}-lite-%{ipv6_ver}
+%patch3 -p1 -b .init6lite
 popd
 
 %build
@@ -122,9 +158,9 @@ export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
 export DEST=%{_initrddir}
-export CONFDIR=%{_sysconfdir}/%{name}
 
 pushd %{name}-common-%{version}
+export CONFDIR=%{_sysconfdir}/%{name}
 # (blino) enable startup (new setting as of 2.1.3)
 perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' %{name}.conf
 
@@ -148,7 +184,20 @@ perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=%{_sysconfdir}/%{name}#' configpath
 
 # let's do the install
 ./install.sh -n
+popd
 
+#(tpg) IPv6
+pushd %{name6}-%{ipv6_ver}
+# (blino) enable startup (new setting as of 2.1.3)
+perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' %{name6}.conf
+# Keep synced with net.ipv4.ip_forward var in /etc/sysctl.conf
+perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name6}.conf
+
+./install.sh -n
+popd
+
+pushd %{name6}-lite-%{ipv6_ver}
+./install.sh -n
 popd
 
 pushd %{name}-lite-%{version}
@@ -168,8 +217,16 @@ popd
 export DONT_GPRINTIFY=1
 
 #(tpg) looks like these files are needed
-touch %{buildroot}/%{_localstatedir}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
-touch %{buildroot}/%{_localstatedir}/lib/shorewall-lite/firewall
+touch %{buildroot}/%{_var}/lib/shorewall/{chains,nat,proxyarp,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
+touch %{buildroot}/%{_var}/lib/shorewall-lite/firewall
+
+#(tpg) ipv6
+touch %{buildroot}/%{_var}/lib/%{name6}/{chains,restarted,zones,restore-base,restore-tail,state,.modules,.modulesdir,.iptables-restore-input,.start,.restart,.restore}
+touch %{buildroot}/%{_var}/lib/%{name6}-lite/firewall
+
+#(tpg) remove hash-bang
+find . -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
+
 
 %clean
 rm -rf %{buildroot}
@@ -177,34 +234,64 @@ rm -rf %{buildroot}
 %post common
 %_post_service shorewall
 
-%create_ghostfile %{_localstatedir}/lib/shorewall/chains root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/nat root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/proxyarp root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/restarted root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/zones root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/restore-base root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/restore-tail root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/state root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.modules root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.modulesdir root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.iptables-restore-input root root 644
-%create_ghostfile %{_localstatedir}/lib/shorewall/.restart root root 700
-%create_ghostfile %{_localstatedir}/lib/shorewall/.restore root root 700
-%create_ghostfile %{_localstatedir}/lib/shorewall/.start root root 700
+%create_ghostfile %{_var}/lib/%{name}/chains root root 644
+%create_ghostfile %{_var}/lib/%{name}/nat root root 644
+%create_ghostfile %{_var}/lib/%{name}/proxyarp root root 644
+%create_ghostfile %{_var}/lib/%{name}/restarted root root 644
+%create_ghostfile %{_var}/lib/%{name}/zones root root 644
+%create_ghostfile %{_var}/lib/%{name}/restore-base root root 644
+%create_ghostfile %{_var}/lib/%{name}/restore-tail root root 644
+%create_ghostfile %{_var}/lib/%{name}/state root root 644
+%create_ghostfile %{_var}/lib/%{name}/.modules root root 644
+%create_ghostfile %{_var}/lib/%{name}/.modulesdir root root 644
+%create_ghostfile %{_var}/lib/%{name}/.iptables-restore-input root root 644
+%create_ghostfile %{_var}/lib/%{name}/.restart root root 700
+%create_ghostfile %{_var}/lib/%{name}/.restore root root 700
+%create_ghostfile %{_var}/lib/%{name}/.start root root 700
 
 %preun common
-%_preun_service shorewall
+%_preun_service %{name}
 if [ $1 = 0 ] ; then
   %{__rm} -f %{_sysconfdir}/%{name}/startup_disabled
   %{__rm} -f %{_var}/lib/%{name}/*
 fi
 
 %post lite
-%_post_service shorewall-lite
-%create_ghostfile %{_localstatedir}/lib/shorewall-lite/firewall root root 644
+%_post_service %{name}-lite
+%create_ghostfile %{_var}/lib/%{name}-lite/firewall root root 644
 
 %preun lite
-%_preun_service shorewall-lite
+%_preun_service %{name}-lite
+
+%post ipv6
+%_post_service %{name6}
+
+%create_ghostfile %{_var}/lib/%{name6}/chains root root 644
+%create_ghostfile %{_var}/lib/%{name6}/restarted root root 644
+%create_ghostfile %{_var}/lib/%{name6}/zones root root 644
+%create_ghostfile %{_var}/lib/%{name6}/restore-base root root 644
+%create_ghostfile %{_var}/lib/%{name6}/restore-tail root root 644
+%create_ghostfile %{_var}/lib/%{name6}/state root root 644
+%create_ghostfile %{_var}/lib/%{name6}/.modules root root 644
+%create_ghostfile %{_var}/lib/%{name6}/.modulesdir root root 644
+%create_ghostfile %{_var}/lib/%{name6}/.iptables-restore-input root root 644
+%create_ghostfile %{_var}/lib/%{name6}/.restart root root 700
+%create_ghostfile %{_var}/lib/%{name6}/.restore root root 700
+%create_ghostfile %{_var}/lib/%{name6}/.start root root 700
+
+%preun ipv6
+%_preun_service %{name6}
+if [ $1 = 0 ] ; then
+  %{__rm} -f %{_sysconfdir}/%{name6}/startup_disabled
+  %{__rm} -f %{_var}/lib/%{name6}/*
+fi
+
+%post ipv6-lite
+%_post_service %{name6}-lite
+%create_ghostfile %{_var}/lib/%{name6}-lite/firewall root root 644
+
+%preun ipv6-lite
+%_preun_service %{name6}-lite
 
 %files
 %defattr(-,root,root)
@@ -214,73 +301,137 @@ fi
 %doc %{name}-common-%{version}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
-%dir %attr(755,root,root) %{_localstatedir}/lib/shorewall
-%ghost %{_localstatedir}/lib/shorewall/*
-%ghost %{_localstatedir}/lib/shorewall/.??*
-%attr(700,root,root) %{_initrddir}/shorewall
+%dir %attr(755,root,root) %{_var}/lib/%{name}
+%ghost %{_var}/lib/%{name}/*
+%ghost %{_var}/lib/%{name}/.??*
+%attr(700,root,root) %{_initrddir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}/*
-%attr(755,root,root) /sbin/shorewall
-%{_datadir}/shorewall/action*
+%attr(755,root,root) /sbin/%{name}
+%{_datadir}/%{name}/action*
 %exclude %{_datadir}/shorewall/configfiles/*
-%{_datadir}/shorewall/configpath
-%{_datadir}/shorewall/firewall
-%{_datadir}/shorewall/functions
-%{_datadir}/shorewall/lib.*
-%{_datadir}/shorewall/macro.*
-%{_datadir}/shorewall/modules
-%{_datadir}/shorewall/rfc1918
-%{_datadir}/shorewall/version
-%{_datadir}/shorewall/wait4ifup
-%{_mandir}/man5/shorewall-accounting.5.*
-%{_mandir}/man5/shorewall-actions.5.*
-%{_mandir}/man5/shorewall-blacklist.5.*
-%{_mandir}/man5/shorewall-ecn.5.*
-%{_mandir}/man5/shorewall-exclusion.5.*
-%{_mandir}/man5/shorewall-hosts.5.*
-%{_mandir}/man5/shorewall-interfaces.5.*
-%{_mandir}/man5/shorewall-maclist.5.*
-%{_mandir}/man5/shorewall-masq.5.*
-%{_mandir}/man5/shorewall-modules.5.*
-%{_mandir}/man5/shorewall-nat.5.*
-%{_mandir}/man5/shorewall-nesting.5.*
-%{_mandir}/man5/shorewall-netmap.5.*
-%{_mandir}/man5/shorewall-params.5.*
-%{_mandir}/man5/shorewall-policy.5.*
-%{_mandir}/man5/shorewall-providers.5.*
-%{_mandir}/man5/shorewall-proxyarp.5.*
-%{_mandir}/man5/shorewall-rfc1918.5.*
-%{_mandir}/man5/shorewall-route_rules.5.*
-%{_mandir}/man5/shorewall-routestopped.5.*
-%{_mandir}/man5/shorewall-rules.5.*
-%{_mandir}/man5/shorewall-tcclasses.5.*
-%{_mandir}/man5/shorewall-tcdevices.5.*
-%{_mandir}/man5/shorewall-tcfilters.5.*
-%{_mandir}/man5/shorewall-tcrules.5.*
-%{_mandir}/man5/shorewall-tos.5.*
-%{_mandir}/man5/shorewall-tunnels.5.*
-%{_mandir}/man5/shorewall-vardir.5.*
-%{_mandir}/man5/shorewall-zones.5.*
-%{_mandir}/man5/shorewall.conf.5.*
-%{_mandir}/man8/shorewall.8.*
+%{_datadir}/%{name}/configpath
+%{_datadir}/%{name}/firewall
+%{_datadir}/%{name}/functions
+%{_datadir}/%{name}/lib.*
+%{_datadir}/%{name}/macro.*
+%{_datadir}/%{name}/modules
+%{_datadir}/%{name}/rfc1918
+%{_datadir}/%{name}/version
+%{_datadir}/%{name}/wait4ifup
+%{_mandir}/man5/%{name}-accounting.5.*
+%{_mandir}/man5/%{name}-actions.5.*
+%{_mandir}/man5/%{name}-blacklist.5.*
+%{_mandir}/man5/%{name}-ecn.5.*
+%{_mandir}/man5/%{name}-exclusion.5.*
+%{_mandir}/man5/%{name}-hosts.5.*
+%{_mandir}/man5/%{name}-interfaces.5.*
+%{_mandir}/man5/%{name}-maclist.5.*
+%{_mandir}/man5/%{name}-masq.5.*
+%{_mandir}/man5/%{name}-modules.5.*
+%{_mandir}/man5/%{name}-nat.5.*
+%{_mandir}/man5/%{name}-nesting.5.*
+%{_mandir}/man5/%{name}-netmap.5.*
+%{_mandir}/man5/%{name}-params.5.*
+%{_mandir}/man5/%{name}-policy.5.*
+%{_mandir}/man5/%{name}-providers.5.*
+%{_mandir}/man5/%{name}-proxyarp.5.*
+%{_mandir}/man5/%{name}-rfc1918.5.*
+%{_mandir}/man5/%{name}-route_rules.5.*
+%{_mandir}/man5/%{name}-routestopped.5.*
+%{_mandir}/man5/%{name}-rules.5.*
+%{_mandir}/man5/%{name}-tcclasses.5.*
+%{_mandir}/man5/%{name}-tcdevices.5.*
+%{_mandir}/man5/%{name}-tcfilters.5.*
+%{_mandir}/man5/%{name}-tcrules.5.*
+%{_mandir}/man5/%{name}-tos.5.*
+%{_mandir}/man5/%{name}-tunnels.5.*
+%{_mandir}/man5/%{name}-vardir.5.*
+%{_mandir}/man5/%{name}-zones.5.*
+%{_mandir}/man5/%{name}.conf.5.*
+%{_mandir}/man8/%{name}.8.*
+
+%files ipv6
+%defattr(-,root,root)
+%doc %{name6}-%{ipv6_ver}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples6}
+%dir %{_sysconfdir}/%{name6}
+%dir %{_datadir}/%{name6}
+%dir %attr(755,root,root) %{_var}/lib/%{name6}
+%ghost %{_var}/lib/%{name6}/*
+%ghost %{_var}/lib/%{name6}/.??*
+%attr(700,root,root) %{_initrddir}/%{name6}
+%config(noreplace) %{_sysconfdir}/%{name6}/*
+%attr(755,root,root) /sbin/%{name6}
+%{_datadir}/%{name6}/action*
+%exclude %{_datadir}/%{name6}/configfiles/*
+%{_datadir}/%{name6}/configpath
+%{_datadir}/%{name6}/functions
+%{_datadir}/%{name6}/lib.*
+%{_datadir}/%{name6}/macro.*
+%{_datadir}/%{name6}/modules
+%{_datadir}/%{name6}/version
+%{_datadir}/%{name6}/wait4ifup
+%{_mandir}/man5/%{name6}-accounting.5.*
+%{_mandir}/man5/%{name6}-actions.5.*
+%{_mandir}/man5/%{name6}-blacklist.5.*
+%{_mandir}/man5/%{name6}-exclusion.5.*
+%{_mandir}/man5/%{name6}-hosts.5.*
+%{_mandir}/man5/%{name6}-interfaces.5.*
+%{_mandir}/man5/%{name6}-maclist.5.*
+%{_mandir}/man5/%{name6}-modules.5.*
+%{_mandir}/man5/%{name6}-nesting.5.*
+%{_mandir}/man5/%{name6}-params.5.*
+%{_mandir}/man5/%{name6}-policy.5.*
+%{_mandir}/man5/%{name6}-providers.5.*
+%{_mandir}/man5/%{name6}-route_rules.5.*
+%{_mandir}/man5/%{name6}-routestopped.5.*
+%{_mandir}/man5/%{name6}-rules.5.*
+%{_mandir}/man5/%{name6}-tcclasses.5.*
+%{_mandir}/man5/%{name6}-tcdevices.5.*
+%{_mandir}/man5/%{name6}-tcrules.5.*
+%{_mandir}/man5/%{name6}-tos.5.*
+%{_mandir}/man5/%{name6}-tunnels.5.*
+%{_mandir}/man5/%{name6}-vardir.5.*
+%{_mandir}/man5/%{name6}-zones.5.*
+%{_mandir}/man5/%{name6}.conf.5.*
+%{_mandir}/man8/%{name6}.8.*
 
 %files lite
 %defattr(-,root,root)
 %doc %{name}-lite-%{version}/*.txt
 %dir %{_datadir}/%{name}-lite
-%dir %attr(755,root,root) %{_localstatedir}/lib/shorewall-lite
-%ghost %{_localstatedir}/lib/shorewall-lite/*
-%attr(700,root,root) %{_initrddir}/shorewall-lite
+%dir %attr(755,root,root) %{_var}/lib/%{name}-lite
+%ghost %{_var}/lib/%{name}-lite/*
+%attr(700,root,root) %{_initrddir}/%{name}-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
-%attr(755,root,root) /sbin/shorewall-lite
-%{_datadir}/shorewall-lite/configpath
-%{_datadir}/shorewall-lite/functions
-%{_datadir}/shorewall-lite/lib.*
-%{_datadir}/shorewall-lite/modules
-%{_datadir}/shorewall-lite/shorecap
-%{_datadir}/shorewall-lite/version
-%{_datadir}/shorewall-lite/wait4ifup
-%{_mandir}/man5/shorewall-lite*
-%{_mandir}/man8/shorewall-lite*
+%attr(755,root,root) /sbin/%{name}-lite
+%{_datadir}/%{name}-lite/configpath
+%{_datadir}/%{name}-lite/functions
+%{_datadir}/%{name}-lite/lib.*
+%{_datadir}/%{name}-lite/modules
+%{_datadir}/%{name}-lite/shorecap
+%{_datadir}/%{name}-lite/version
+%{_datadir}/%{name}-lite/wait4ifup
+%{_mandir}/man5/%{name}-lite*
+%{_mandir}/man8/%{name}-lite*
+
+%files ipv6-lite
+%defattr(-,root,root)
+%doc %{name6}-lite-%{ipv6_ver}/*.txt
+%dir %{_datadir}/%{name6}-lite
+%dir %attr(755,root,root) %{_var}/lib/%{name6}-lite
+%ghost %{_var}/lib/%{name6}-lite/*
+%attr(700,root,root) %{_initrddir}/%{name6}-lite
+%config(noreplace) %{_sysconfdir}/%{name6}-lite/*
+%attr(755,root,root) /sbin/%{name6}-lite
+%{_datadir}/%{name6}-lite/configpath
+%{_datadir}/%{name6}-lite/functions
+%{_datadir}/%{name6}-lite/lib.*
+%{_datadir}/%{name6}-lite/modules
+%{_datadir}/%{name6}-lite/shorecap
+%{_datadir}/%{name6}-lite/version
+%{_datadir}/%{name6}-lite/wait4ifup
+%{_mandir}/man5/%{name6}-lite*
+%{_mandir}/man8/%{name6}-lite*
 
 %files perl
 %defattr(-,root,root)
@@ -289,9 +440,9 @@ fi
 %dir %{_datadir}/%{name}-perl/Shorewall
 %{_datadir}/%{name}-perl/Shorewall/*.pm
 %{_datadir}/%{name}-perl/compiler.pl
-%{_datadir}/%{name}-perl/prog.footer
-%{_datadir}/%{name}-perl/prog.functions
-%{_datadir}/%{name}-perl/prog.header
+%{_datadir}/%{name}-perl/prog.footer*
+%{_datadir}/%{name}-perl/prog.functions*
+%{_datadir}/%{name}-perl/prog.header*
 %{_datadir}/%{name}-perl/version
 
 %files shell
