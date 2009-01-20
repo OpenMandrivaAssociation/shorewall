@@ -4,7 +4,7 @@
 %define version_minor 4
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}.5
+%define perl_ver %{version}.6
 %define ipv6_ver %{version}.1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
@@ -13,7 +13,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -75,7 +75,7 @@ Summary:	Lite version of ipv6 shorewall
 Group:		System/Servers
 Requires:	%{name6} = %{version}-%{release}
 Requires(post):	rpm-helper
-Requires(preun): rpm-helper
+Requires(preun):	rpm-helper
 
 %description ipv6-lite
 Shorewall IPv6 Lite is a companion product to Shorewall IPv6 that allows 
