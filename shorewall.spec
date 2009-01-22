@@ -1,11 +1,11 @@
 %define debug_package %{nil}
 
 %define version_major 4.2
-%define version_minor 4
+%define version_minor 5
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}.6
-%define ipv6_ver %{version}.1
+%define perl_ver %{version}
+%define ipv6_ver %{version}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 %define name6 %{name}6
@@ -13,7 +13,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -25,10 +25,10 @@ Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source5:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
 Source6:	%ftp_path/%{name6}-lite-%{ipv6_ver}.tar.bz2
 Source7:	%ftp_path/%{version}.sha1sums
-Patch0:		%{name}-common-4.2.4-init-script.patch
-Patch1:		%{name}-lite-4.2.4-init-script.patch
-Patch2:		%{name6}-4.2.4.1-init-script.patch
-Patch3:		%{name6}-lite-4.2.4.1-init-script.patch
+Patch0:		%{name}-common-4.2.5-init-script.patch
+Patch1:		%{name}-lite-4.2.5-init-script.patch
+Patch2:		%{name6}-4.2.5-init-script.patch
+Patch3:		%{name6}-lite-4.2.5-init-script.patch
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-perl = %{version}-%{release}
 BuildConflicts:	apt-common
