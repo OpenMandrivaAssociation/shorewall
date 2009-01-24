@@ -13,7 +13,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -73,7 +73,7 @@ An IPv6 enabled and capable Shoreline Firewall.
 %package ipv6-lite
 Summary:	Lite version of ipv6 shorewall
 Group:		System/Servers
-Requires:	%{name6} = %{version}-%{release}
+Requires:	%{name}-ipv6 = %{version}-%{release}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 
