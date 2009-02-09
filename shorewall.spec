@@ -4,8 +4,9 @@
 %define version_minor 5
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}
-%define ipv6_ver %{version}
+%define perl_ver %{version}.3
+%define ipv6_ver %{version}.1
+%define ipv6_lite_ver %{version}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 %define name6 %{name}6
@@ -13,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -23,7 +24,7 @@ Source2:	%ftp_path/%{name}-perl-%{perl_ver}.tar.bz2
 Source3:	%ftp_path/%{name}-shell-%{shell_ver}.tar.bz2
 Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source5:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
-Source6:	%ftp_path/%{name6}-lite-%{ipv6_ver}.tar.bz2
+Source6:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
 Source7:	%ftp_path/%{version}.sha1sums
 Patch0:		%{name}-common-4.2.5-init-script.patch
 Patch1:		%{name}-lite-4.2.5-init-script.patch
@@ -145,7 +146,7 @@ pushd %{name6}-%{ipv6_ver}
 %patch2 -p1 -b .init6
 popd
 
-pushd %{name6}-lite-%{ipv6_ver}
+pushd %{name6}-lite-%{ipv6_lite_ver}
 %patch3 -p1 -b .init6lite
 popd
 
@@ -196,7 +197,7 @@ perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name6}.conf
 ./install.sh -n
 popd
 
-pushd %{name6}-lite-%{ipv6_ver}
+pushd %{name6}-lite-%{ipv6_lite_ver}
 ./install.sh -n
 popd
 
@@ -416,7 +417,7 @@ fi
 
 %files ipv6-lite
 %defattr(-,root,root)
-%doc %{name6}-lite-%{ipv6_ver}/*.txt
+%doc %{name6}-lite-%{ipv6_lite_ver}/*.txt
 %dir %{_datadir}/%{name6}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name6}-lite
 %ghost %{_var}/lib/%{name6}-lite/*
