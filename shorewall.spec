@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -306,7 +306,7 @@ fi
 %ghost %{_var}/lib/%{name}/*
 %ghost %{_var}/lib/%{name}/.??*
 %attr(700,root,root) %{_initrddir}/%{name}
-%config(noreplace) %{_sysconfdir}/%{name}/*
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/%{name}
 %{_datadir}/%{name}/action*
 %exclude %{_datadir}/shorewall/configfiles/*
