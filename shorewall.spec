@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.2
-%define version_minor 6
+%define version_minor 8
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
 %define perl_ver %{version}
@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -331,6 +331,7 @@ fi
 %{_mandir}/man5/%{name}-modules.5.*
 %{_mandir}/man5/%{name}-nat.5.*
 %{_mandir}/man5/%{name}-nesting.5.*
+%{_mandir}/man5/%{name}-notrack.5.*
 %{_mandir}/man5/%{name}-netmap.5.*
 %{_mandir}/man5/%{name}-params.5.*
 %{_mandir}/man5/%{name}-policy.5.*
@@ -380,6 +381,7 @@ fi
 %{_mandir}/man5/%{name6}-maclist.5.*
 %{_mandir}/man5/%{name6}-modules.5.*
 %{_mandir}/man5/%{name6}-nesting.5.*
+%{_mandir}/man5/%{name6}-notrack.5.*
 %{_mandir}/man5/%{name6}-params.5.*
 %{_mandir}/man5/%{name6}-policy.5.*
 %{_mandir}/man5/%{name6}-providers.5.*
