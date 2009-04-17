@@ -4,7 +4,7 @@
 %define version_minor 8
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}
+%define perl_ver %{version}.1
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
