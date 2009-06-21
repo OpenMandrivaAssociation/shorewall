@@ -1,12 +1,13 @@
 %define debug_package %{nil}
 
 %define version_major 4.2
-%define version_minor 9
+%define version_minor 10
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}
+%define perl_ver %{version}.1
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
+%define sha1sums_ver %{version}.1
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 %define name6 %{name}6
@@ -25,7 +26,7 @@ Source3:	%ftp_path/%{name}-shell-%{shell_ver}.tar.bz2
 Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source5:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
 Source6:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
-Source7:	%ftp_path/%{version}.sha1sums
+Source7:	%ftp_path/%{sha1sums_ver}.sha1sums
 Patch0:		%{name}-common-4.2.5-init-script.patch
 Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
