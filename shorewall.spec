@@ -1,13 +1,12 @@
 %define debug_package %{nil}
 
-%define version_major 4.2
-%define version_minor 10
+%define version_major 4.4
+%define version_minor 0
 %define version %{version_major}.%{version_minor}
 %define shell_ver %{version}
-%define perl_ver %{version}.1
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
-%define sha1sums_ver %{version}.1
+%define sha1sums_ver %{version}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 %define name6 %{name}6
@@ -19,51 +18,38 @@ Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
-Source0:	%ftp_path/%{name}-common-%{version}.tar.bz2
+Source0:	%ftp_path/%{name}-%{version}.tar.bz2
 Source1:	%ftp_path/%{name}-lite-%{version}.tar.bz2
-Source2:	%ftp_path/%{name}-perl-%{perl_ver}.tar.bz2
-Source3:	%ftp_path/%{name}-shell-%{shell_ver}.tar.bz2
-Source4:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
-Source5:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
-Source6:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
-Source7:	%ftp_path/%{sha1sums_ver}.sha1sums
+Source2:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
+Source3:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
+Source4:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
+Source5:	%ftp_path/%{sha1sums_ver}.sha1sums
 Patch0:		%{name}-common-4.2.5-init-script.patch
 Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
-Requires:	%{name}-common = %{version}-%{release}
-Requires:	%{name}-perl = %{version}-%{release}
+Requires:	iptables >= 1.4.1
+Requires:	iproute2
+Requires(post):	rpm-helper
+Requires(preun):	rpm-helper
+Conflicts:	shorewall < 4.0.7-1
 BuildConflicts:	apt-common
 BuildArch:	noarch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
+# since shorewall 4.4 we do not have common, shell and perl modules anymore
+Obsoletes:	shorewall-common
+Obsoletes:	shorewall-perl
+Obsoletes:	shorewall-shell
 
 %description
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
 (iptables) based firewall that can be used on a dedicated firewall system,
 a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 
-%package common
-Summary:	Common shorewall files
-Group:		System/Servers
-Requires:	iptables >= 1.4.1
-Requires:	iproute2
-Requires(post):	rpm-helper
-Requires(preun):	rpm-helper
-Conflicts:	shorewall < 4.0.7-1
-
-%description common
-The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
-(iptables) based firewall that can be used on a dedicated firewall system,
-a multi-function gateway/ router/server or on a standalone GNU/Linux system.
-
-Notice:
-If you want control IPv6 connections, please make sure that shorewall-ipv6 
-is installed on your system.
-
 %package ipv6
 Summary:	IPv6 capable Shorewall
 Group:		System/Servers
-Requires:	%{name}-common = %{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 Requires:	iptables-ipv6
 Requires:	iproute2
 Requires(post):	rpm-helper
@@ -87,33 +73,13 @@ firewalls.
 %package lite
 Summary:	Lite version of shorewall
 Group:		System/Servers
-Requires:	%{name}-common = %{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 
 %description lite
 Shorewall Lite is a companion product to Shorewall that allows network
 administrators to centralize the configuration of Shorewall-based firewalls.
-
-%package perl
-Summary:	Perl compiler for shorewall
-Group:		System/Servers
-Requires:	%{name}-common = %{version}-%{release}
-Requires:	perl
-
-%description perl
-Shorewall-perl is a part of Shorewall that allows faster compilation and
-execution than the legacy shorewall-shell compiler.
-
-%package shell
-Summary:	Shell compiler for shorewall
-Group:		System/Servers
-Requires:	%{name}-common = %{version}-%{release}
-
-%description shell
-Shorewall-shell is a part of Shorewall that allows running shorewall with
-legacy configurations. Shorewall-perl is the preferred compiler, please use
-it for new installations.
 
 %package doc
 Summary:	Firewall scripts
@@ -132,10 +98,8 @@ This package contains the docs.
 %setup -q -T -D -a 2
 %setup -q -T -D -a 3
 %setup -q -T -D -a 4
-%setup -q -T -D -a 5
-%setup -q -T -D -a 6
 
-pushd %{name}-common-%{version}
+pushd %{name}-%{version}
 %patch0 -p1 -b .init
 popd
 
@@ -161,31 +125,31 @@ export OWNER=`id -n -u`
 export GROUP=`id -n -g`
 export DEST=%{_initrddir}
 
-pushd %{name}-common-%{version}
+pushd %{name}-%{version}
 export CONFDIR=%{_sysconfdir}/%{name}
 # (blino) enable startup (new setting as of 2.1.3)
-perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' %{name}.conf
+perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' configfiles/%{name}.conf
 
 # Keep synced with net.ipv4.ip_forward var in /etc/sysctl.conf
-perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name}.conf
+perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' configfiles/%{name}.conf
 
 # blank Internal option 
-perl -pi -e 's/TC_ENABLED=Internal/TC_ENABLED=/' %{name}.conf
+perl -pi -e 's/TC_ENABLED=Internal/TC_ENABLED=/' configfiles/%{name}.conf
 
 # (tpg) use perl compiler
-perl -pi -e 's/SHOREWALL_COMPILER=.*/SHOREWALL_COMPILER=perl/' %{name}.conf
+perl -pi -e 's/SHOREWALL_COMPILER=.*/SHOREWALL_COMPILER=perl/' configfiles/%{name}.conf
 
 # (tpg) do the optimizations
-perl -pi -e 's/OPTIMIZE=.*/OPTIMIZE=1/' %{name}.conf
+perl -pi -e 's/OPTIMIZE=.*/OPTIMIZE=1/' configfiles/%{name}.conf
 
 # (tpg) enable IPv6
-perl -pi -e 's#DISABLE_IPV6=.*#DISABLE_IPV6=No#' %{name}.conf
+perl -pi -e 's#DISABLE_IPV6=.*#DISABLE_IPV6=No#' configfiles/%{name}.conf
 
 # (tpg) set config path
-perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=%{_sysconfdir}/%{name}#' configpath
+perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=configfiles/%{/g_sysconfdir}/%{name}#' configpath
 
 # let's do the install
-./install.sh -n
+./install.sh
 popd
 
 #(tpg) IPv6
@@ -195,23 +159,15 @@ perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' %{name6}.conf
 # Keep synced with net.ipv4.ip_forward var in /etc/sysctl.conf
 perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name6}.conf
 
-./install.sh -n
+./install.sh
 popd
 
 pushd %{name6}-lite-%{ipv6_lite_ver}
-./install.sh -n
+./install.sh
 popd
 
 pushd %{name}-lite-%{version}
-./install.sh -n
-popd
-
-pushd %{name}-perl-%{perl_ver}
-./install.sh -n
-popd
-
-pushd %{name}-shell-%{shell_ver}
-./install.sh -n
+./install.sh
 popd
 
 # Suppress automatic replacement of "echo" by "gprintf" in the shorewall
@@ -233,7 +189,7 @@ find . -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
 %clean
 rm -rf %{buildroot}
 
-%post common
+%post
 %_post_service shorewall
 
 %create_ghostfile %{_var}/lib/%{name}/chains root root 644
@@ -251,7 +207,7 @@ rm -rf %{buildroot}
 %create_ghostfile %{_var}/lib/%{name}/.restore root root 700
 %create_ghostfile %{_var}/lib/%{name}/.start root root 700
 
-%preun common
+%preun
 %_preun_service %{name}
 if [ $1 = 0 ] ; then
   %{__rm} -f %{_sysconfdir}/%{name}/startup_disabled
@@ -297,10 +253,7 @@ fi
 
 %files
 %defattr(-,root,root)
-
-%files common
-%defattr(-,root,root)
-%doc %{name}-common-%{version}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples}
+%doc %{name}-%{version}/{changelog.txt,releasenotes.txt,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
 %dir %attr(755,root,root) %{_var}/lib/%{name}
@@ -312,12 +265,10 @@ fi
 %{_datadir}/%{name}/action*
 %exclude %{_datadir}/shorewall/configfiles/*
 %{_datadir}/%{name}/configpath
-%{_datadir}/%{name}/firewall
 %{_datadir}/%{name}/functions
 %{_datadir}/%{name}/lib.*
 %{_datadir}/%{name}/macro.*
 %{_datadir}/%{name}/modules
-%{_datadir}/%{name}/rfc1918
 %{_datadir}/%{name}/version
 %{_datadir}/%{name}/wait4ifup
 %{_mandir}/man5/%{name}-accounting.5.*
@@ -338,7 +289,6 @@ fi
 %{_mandir}/man5/%{name}-policy.5.*
 %{_mandir}/man5/%{name}-providers.5.*
 %{_mandir}/man5/%{name}-proxyarp.5.*
-%{_mandir}/man5/%{name}-rfc1918.5.*
 %{_mandir}/man5/%{name}-route_rules.5.*
 %{_mandir}/man5/%{name}-routestopped.5.*
 %{_mandir}/man5/%{name}-rules.5.*
@@ -352,6 +302,11 @@ fi
 %{_mandir}/man5/%{name}-zones.5.*
 %{_mandir}/man5/%{name}.conf.5.*
 %{_mandir}/man8/%{name}.8.*
+%{_datadir}/shorewall/Shorewall/*.pm
+%{_datadir}/shorewall/compiler.pl
+%{_datadir}/shorewall/prog.footer
+%{_datadir}/shorewall/prog.header
+
 
 %files ipv6
 %defattr(-,root,root)
@@ -366,6 +321,8 @@ fi
 %attr(755,root,root) /sbin/%{name6}
 %{_datadir}/%{name6}/action*
 %exclude %{_datadir}/%{name6}/configfiles/*
+%{_datadir}/%{name}/prog.footer6
+%{_datadir}/%{name}/prog.header6
 %{_datadir}/%{name6}/configpath
 %{_datadir}/%{name6}/functions
 %{_datadir}/%{name6}/lib.*
@@ -436,27 +393,6 @@ fi
 %{_datadir}/%{name6}-lite/wait4ifup
 %{_mandir}/man5/%{name6}-lite*
 %{_mandir}/man8/%{name6}-lite*
-
-%files perl
-%defattr(-,root,root)
-%doc %{name}-perl-%{perl_ver}/*.txt
-%dir %{_datadir}/%{name}-perl
-%dir %{_datadir}/%{name}-perl/Shorewall
-%{_datadir}/%{name}-perl/Shorewall/*.pm
-%{_datadir}/%{name}-perl/compiler.pl
-%{_datadir}/%{name}-perl/prog.footer*
-%{_datadir}/%{name}-perl/prog.functions*
-%{_datadir}/%{name}-perl/prog.header*
-%{_datadir}/%{name}-perl/version
-
-%files shell
-%defattr(-,root,root)
-%doc %{name}-shell-%{shell_ver}/*.txt
-%dir %{_datadir}/%{name}-shell
-%{_datadir}/%{name}-shell/compiler
-%{_datadir}/%{name}-shell/lib.*
-%{_datadir}/%{name}-shell/prog.*
-%{_datadir}/%{name}-shell/version
 
 %files doc 
 %defattr(-,root,root)
