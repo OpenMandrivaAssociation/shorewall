@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -185,6 +185,21 @@ touch %{buildroot}/%{_var}/lib/%{name6}-lite/firewall
 #(tpg) remove hash-bang
 find . -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
 
+# add information about 4.4.0 upgrade
+cat > README.urpmi << EOF
+As of shorewall 4.4.0, the shorewall-common and shorewall-perl packages
+were merged into a single shorewall package. Other notable changes in 4.4.0
+version are:
+ - The support for shorewall-shell has been discontinued
+ - Support for SAME target in /etc/shorewall/masq and /etc/shorewall/rules
+   has been removed.
+ - Support for norfc1918 and RFC1918_STRICT have been removed.
+ - The name 'any' is now reserved and may not be used as a zone name.
+
+If you were relying on those options, please review your shorewall
+configuration. Refer to the /usr/share/doc/shorewall/releasenotes.txt file
+for further instructions.
+EOF
 
 %clean
 rm -rf %{buildroot}
@@ -253,7 +268,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc %{name}-%{version}/{changelog.txt,releasenotes.txt,Samples}
+%doc README.urpmi %{name}-%{version}/{changelog.txt,releasenotes.txt,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
 %dir %attr(755,root,root) %{_var}/lib/%{name}
