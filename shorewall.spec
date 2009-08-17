@@ -186,7 +186,7 @@ touch %{buildroot}/%{_var}/lib/%{name6}-lite/firewall
 find . -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
 
 # add information about 4.4.0 upgrade
-cat > README.urpmi << EOF
+cat > README.4.4.0.upgrade.urpmi << EOF
 As of shorewall 4.4.0, the shorewall-common and shorewall-perl packages
 were merged into a single shorewall package. Other notable changes in 4.4.0
 version are:
