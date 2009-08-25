@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -28,6 +28,8 @@ Patch0:		%{name}-common-4.2.5-init-script.patch
 Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
+# shorewall 4.4.0 does not adds comments at the end of the file
+Patch4:		%{name}-4.4.0-comment.patch
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires(post):	rpm-helper
@@ -101,6 +103,7 @@ This package contains the docs.
 
 pushd %{name}-%{version}
 %patch0 -p1 -b .init
+%patch4 -p1 -b .comment
 popd
 
 pushd %{name}-lite-%{version}
@@ -268,7 +271,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc README.urpmi %{name}-%{version}/{changelog.txt,releasenotes.txt,Samples}
+%doc README.4.4.0.upgrade.urpmi %{name}-%{version}/{changelog.txt,releasenotes.txt,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
 %dir %attr(755,root,root) %{_var}/lib/%{name}
