@@ -1,12 +1,12 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 0
+%define version_minor 1
 %define version %{version_major}.%{version_minor}
-%define shell_ver %{version}
+%define version_main %{version}.2
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
-%define sha1sums_ver %{version}
+%define sha1sums_ver %{version_main}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 %define name6 %{name}6
@@ -14,11 +14,11 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 3
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
-Source0:	%ftp_path/%{name}-%{version}.tar.bz2
+Source0:	%ftp_path/%{name}-%{version_main}.tar.bz2
 Source1:	%ftp_path/%{name}-lite-%{version}.tar.bz2
 Source2:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source3:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
@@ -101,7 +101,7 @@ This package contains the docs.
 %setup -q -T -D -a 3
 %setup -q -T -D -a 4
 
-pushd %{name}-%{version}
+pushd %{name}-%{version_main}
 %patch0 -p1 -b .init
 %patch4 -p1 -b .comment
 popd
@@ -128,7 +128,7 @@ export OWNER=`id -n -u`
 export GROUP=`id -n -g`
 export DEST=%{_initrddir}
 
-pushd %{name}-%{version}
+pushd %{name}-%{version_main}
 export CONFDIR=%{_sysconfdir}/%{name}
 # (blino) enable startup (new setting as of 2.1.3)
 perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' configfiles/%{name}.conf
@@ -271,7 +271,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc README.4.4.0.upgrade.urpmi %{name}-%{version}/{changelog.txt,releasenotes.txt,Samples}
+%doc README.4.4.0.upgrade.urpmi %{name}-%{version_main}/{changelog.txt,releasenotes.txt,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
 %dir %attr(755,root,root) %{_var}/lib/%{name}
