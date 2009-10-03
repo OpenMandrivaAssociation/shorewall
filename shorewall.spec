@@ -1,9 +1,9 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 1
+%define version_minor 2
 %define version %{version_major}.%{version_minor}
-%define version_main %{version}.2
+%define version_main %{version}
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
 %define sha1sums_ver %{version_main}
