@@ -3,7 +3,7 @@
 %define version_major 4.4
 %define version_minor 2
 %define version %{version_major}.%{version_minor}
-%define version_main %{version}
+%define version_main %{version}.2
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
 %define sha1sums_ver %{version_main}
@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
