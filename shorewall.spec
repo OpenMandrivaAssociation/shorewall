@@ -1,9 +1,9 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 3
+%define version_minor 5
 %define version %{version_major}.%{version_minor}
-%define version_main %{version}
+%define version_main %{version}.3
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
 %define sha1sums_ver %{version_main}
@@ -277,6 +277,7 @@ fi
 %dir %attr(755,root,root) %{_var}/lib/%{name}
 %ghost %{_var}/lib/%{name}/*
 %ghost %{_var}/lib/%{name}/.??*
+%config %{_sysconfdir}/logrotate.d/%{name}
 %attr(700,root,root) %{_initrddir}/%{name}
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/%{name}
@@ -336,6 +337,7 @@ fi
 %ghost %{_var}/lib/%{name6}/.??*
 %attr(700,root,root) %{_initrddir}/%{name6}
 %config(noreplace) %{_sysconfdir}/%{name6}/*
+%config %{_sysconfdir}/logrotate.d/%{name6}
 %attr(755,root,root) /sbin/%{name6}
 %{_datadir}/%{name6}/action*
 %exclude %{_datadir}/%{name6}/configfiles/*
@@ -382,6 +384,7 @@ fi
 %ghost %{_var}/lib/%{name}-lite/*
 %attr(700,root,root) %{_initrddir}/%{name}-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
+%config %{_sysconfdir}/logrotate.d/%{name}-lite
 %attr(755,root,root) /sbin/%{name}-lite
 %{_datadir}/%{name}-lite/configpath
 %{_datadir}/%{name}-lite/functions
@@ -401,6 +404,7 @@ fi
 %ghost %{_var}/lib/%{name6}-lite/*
 %attr(700,root,root) %{_initrddir}/%{name6}-lite
 %config(noreplace) %{_sysconfdir}/%{name6}-lite/*
+%config %{_sysconfdir}/logrotate.d/%{name6}-lite
 %attr(755,root,root) /sbin/%{name6}-lite
 %{_datadir}/%{name6}-lite/configpath
 %{_datadir}/%{name6}-lite/functions
