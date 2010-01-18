@@ -1,9 +1,9 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 5
+%define version_minor 6
 %define version %{version_major}.%{version_minor}
-%define version_main %{version}.4
+%define version_main %{version}
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
 %define sha1sums_ver %{version_main}
@@ -14,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -312,6 +312,8 @@ fi
 %{_mandir}/man5/%{name}-routestopped.5.*
 %{_mandir}/man5/%{name}-rules.5.*
 %{_mandir}/man5/%{name}-tcclasses.5.*
+%{_mandir}/man5/%{name}-tcinterfaces.5.*
+%{_mandir}/man5/%{name}-tcpri.5.*
 %{_mandir}/man5/%{name}-tcdevices.5.*
 %{_mandir}/man5/%{name}-tcfilters.5.*
 %{_mandir}/man5/%{name}-tcrules.5.*
@@ -368,6 +370,8 @@ fi
 %{_mandir}/man5/%{name6}-rules.5.*
 %{_mandir}/man5/%{name6}-tcclasses.5.*
 %{_mandir}/man5/%{name6}-tcdevices.5.*
+%{_mandir}/man5/%{name6}-tcinterfaces.5.*
+%{_mandir}/man5/%{name6}-tcpri.5.*
 %{_mandir}/man5/%{name6}-tcrules.5.*
 %{_mandir}/man5/%{name6}-tos.5.*
 %{_mandir}/man5/%{name6}-tunnels.5.*
