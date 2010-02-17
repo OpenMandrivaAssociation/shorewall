@@ -1,11 +1,12 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 6
+%define version_minor 7
 %define version %{version_major}.%{version_minor}
-%define version_main %{version}
-%define ipv6_ver %{version}
-%define ipv6_lite_ver %{version}
+%define version_main %{version}.4
+%define version_lite %{version}.4
+%define ipv6_ver %{version}.4
+%define ipv6_lite_ver %{version}.4
 %define sha1sums_ver %{version_main}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
@@ -19,7 +20,7 @@ License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
 Source0:	%ftp_path/%{name}-%{version_main}.tar.bz2
-Source1:	%ftp_path/%{name}-lite-%{version}.tar.bz2
+Source1:	%ftp_path/%{name}-lite-%{version_lite}.tar.bz2
 Source2:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source3:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
 Source4:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
@@ -106,7 +107,7 @@ pushd %{name}-%{version_main}
 %patch4 -p1 -b .comment
 popd
 
-pushd %{name}-lite-%{version}
+pushd %{name}-lite-%{version_lite}
 %patch1 -p1 -b .initlite
 popd
 
@@ -169,7 +170,7 @@ pushd %{name6}-lite-%{ipv6_lite_ver}
 ./install.sh
 popd
 
-pushd %{name}-lite-%{version}
+pushd %{name}-lite-%{version_lite}
 ./install.sh
 popd
 
@@ -285,6 +286,7 @@ fi
 %exclude %{_datadir}/shorewall/configfiles/*
 %{_datadir}/%{name}/configpath
 %{_datadir}/%{name}/functions
+%{_datadir}/%{name}/helpers
 %{_datadir}/%{name}/lib.*
 %{_datadir}/%{name}/macro.*
 %{_datadir}/%{name}/modules
@@ -347,6 +349,7 @@ fi
 %{_datadir}/%{name}/prog.header6
 %{_datadir}/%{name6}/configpath
 %{_datadir}/%{name6}/functions
+%{_datadir}/%{name6}/helpers
 %{_datadir}/%{name6}/lib.*
 %{_datadir}/%{name6}/macro.*
 %{_datadir}/%{name6}/modules
@@ -382,7 +385,7 @@ fi
 
 %files lite
 %defattr(-,root,root)
-%doc %{name}-lite-%{version}/*.txt
+%doc %{name}-lite-%{version_lite}/*.txt
 %dir %{_datadir}/%{name}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name}-lite
 %ghost %{_var}/lib/%{name}-lite/*
