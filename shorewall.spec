@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 9
+%define version_minor 11
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -30,8 +30,8 @@ Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
 # shorewall 4.4.0 does not adds comments at the end of the file
-Patch4:		%{name}-4.4.0-comment.patch
-Patch5:		%{name}-4.4.9-module_suffix.patch
+Patch4:		%{name}-4.4.11-comment.patch
+Patch5:		%{name}-4.4.11-module_suffix.patch
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires(post):	rpm-helper
@@ -121,7 +121,7 @@ pushd %{name6}-lite-%{ipv6_lite_ver}
 popd
 
 # update module suffix for all directories
-%patch5 -p1 -b .module_suffix
+%patch5 -p0 -b .module_suffix
 
 %build
 # (tpg) we do nothing here
@@ -329,6 +329,7 @@ fi
 %{_mandir}/man5/%{name}-zones.5.*
 %{_mandir}/man5/%{name}.conf.5.*
 %{_mandir}/man8/%{name}.8.*
+%{_mandir}/man8/%{name}-init.8.*
 %{_datadir}/shorewall/Shorewall/*.pm
 %{_datadir}/shorewall/compiler.pl
 %{_datadir}/shorewall/prog.footer
@@ -427,6 +428,6 @@ fi
 %{_mandir}/man5/%{name6}-lite*
 %{_mandir}/man8/%{name6}-lite*
 
-%files doc 
+%files doc
 %defattr(-,root,root)
 %doc %{name}-docs-html-%{version}/*
