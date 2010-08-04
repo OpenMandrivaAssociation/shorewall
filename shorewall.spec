@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -34,6 +34,7 @@ Patch4:		%{name}-4.4.11-comment.patch
 Patch5:		%{name}-4.4.11-module_suffix.patch
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
+Requires:	dash
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Conflicts:	shorewall < 4.0.7-1
@@ -191,7 +192,10 @@ touch %{buildroot}/%{_var}/lib/%{name6}/{chains,restarted,zones,restore-base,res
 touch %{buildroot}/%{_var}/lib/%{name6}-lite/firewall
 
 #(tpg) remove hash-bang
-find . -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
+find %{buildroot} -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
+
+# (tpg) let's use dash everywhere!
+find %{buildroot} -type f -exec sed -i -e 's@/bin/sh@/bin/dash@' {} \;
 
 # add information about 4.4.0 upgrade
 cat > README.4.4.0.upgrade.urpmi << EOF
