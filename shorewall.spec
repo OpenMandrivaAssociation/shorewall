@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 11
+%define version_minor 12.1
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -30,11 +30,10 @@ Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
 # shorewall 4.4.0 does not adds comments at the end of the file
-Patch4:		%{name}-4.4.11-comment.patch
-Patch5:		%{name}-4.4.11-module_suffix.patch
+Patch4:		%{name}-4.4.12.1-comment.patch
+Patch5:		%{name}-4.4.12.1-module_suffix.patch
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
-Requires:	dash
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Conflicts:	shorewall < 4.0.7-1
