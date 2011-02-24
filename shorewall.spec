@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 12.1
+%define version_minor 17
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -30,8 +30,8 @@ Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
 # shorewall 4.4.0 does not adds comments at the end of the file
-Patch4:		%{name}-4.4.12.1-comment.patch
-Patch5:		%{name}-4.4.12.1-module_suffix.patch
+Patch4:		%{name}-4.4.17-comment.patch
+Patch5:		%{name}-4.4.17-module_suffix.diff
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires(post):	rpm-helper
@@ -121,7 +121,7 @@ pushd %{name6}-lite-%{ipv6_lite_ver}
 popd
 
 # update module suffix for all directories
-%patch5 -p0 -b .module_suffix
+%patch5 -p1 -b .module_suffix
 
 %build
 # (tpg) we do nothing here
@@ -212,6 +212,10 @@ configuration. Refer to the /usr/share/doc/shorewall/releasenotes.txt file
 for further instructions.
 EOF
 
+# due to the removal of the %%exclude macro...
+rm -rf %{buildroot}%{_datadir}/%{name6}/configfiles
+rm -rf %{buildroot}%{_datadir}/shorewall/configfiles
+
 %clean
 rm -rf %{buildroot}
 
@@ -290,7 +294,6 @@ fi
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/%{name}
 %{_datadir}/%{name}/action*
-%exclude %{_datadir}/shorewall/configfiles/*
 %{_datadir}/%{name}/configpath
 %{_datadir}/%{name}/functions
 %{_datadir}/%{name}/helpers
@@ -299,6 +302,7 @@ fi
 %{_datadir}/%{name}/modules
 %{_datadir}/%{name}/version
 %{_datadir}/%{name}/wait4ifup
+%{_datadir}/%{name}/getparams
 %{_mandir}/man5/%{name}-accounting.5.*
 %{_mandir}/man5/%{name}-actions.5.*
 %{_mandir}/man5/%{name}-blacklist.5.*
@@ -331,13 +335,16 @@ fi
 %{_mandir}/man5/%{name}-vardir.5.*
 %{_mandir}/man5/%{name}-zones.5.*
 %{_mandir}/man5/%{name}.conf.5.*
+%{_mandir}/man5/%{name}-ipsets.5*
+%{_mandir}/man5/%{name}-routes.5*
+%{_mandir}/man5/%{name}-secmarks.5*
 %{_mandir}/man8/%{name}.8.*
 %{_mandir}/man8/%{name}-init.8.*
+%dir %{_datadir}/shorewall/Shorewall
 %{_datadir}/shorewall/Shorewall/*.pm
 %{_datadir}/shorewall/compiler.pl
 %{_datadir}/shorewall/prog.footer
 %{_datadir}/shorewall/prog.header
-
 
 %files ipv6
 %defattr(-,root,root)
@@ -352,7 +359,6 @@ fi
 %config %{_sysconfdir}/logrotate.d/%{name6}
 %attr(755,root,root) /sbin/%{name6}
 %{_datadir}/%{name6}/action*
-%exclude %{_datadir}/%{name6}/configfiles/*
 %{_datadir}/%{name}/prog.footer6
 %{_datadir}/%{name}/prog.header6
 %{_datadir}/%{name6}/configpath
@@ -389,6 +395,10 @@ fi
 %{_mandir}/man5/%{name6}-vardir.5.*
 %{_mandir}/man5/%{name6}-zones.5.*
 %{_mandir}/man5/%{name6}.conf.5.*
+%{_mandir}/man5/%{name6}-proxyndp.5*
+%{_mandir}/man5/%{name6}-routes.5*
+%{_mandir}/man5/%{name6}-secmarks.5*
+%{_mandir}/man5/%{name6}-tcfilters.5*
 %{_mandir}/man8/%{name6}.8.*
 
 %files lite
