@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 17
+%define version_minor 19.1
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -31,7 +31,6 @@ Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
 # shorewall 4.4.0 does not adds comments at the end of the file
 Patch4:		%{name}-4.4.17-comment.patch
-Patch5:		%{name}-4.4.17-module_suffix.diff
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires(post):	rpm-helper
@@ -119,9 +118,6 @@ popd
 pushd %{name6}-lite-%{ipv6_lite_ver}
 %patch3 -p1 -b .init6lite
 popd
-
-# update module suffix for all directories
-%patch5 -p1 -b .module_suffix
 
 %build
 # (tpg) we do nothing here
@@ -299,7 +295,7 @@ fi
 %{_datadir}/%{name}/helpers
 %{_datadir}/%{name}/lib.*
 %{_datadir}/%{name}/macro.*
-%{_datadir}/%{name}/modules
+%{_datadir}/%{name}/modules*
 %{_datadir}/%{name}/version
 %{_datadir}/%{name}/wait4ifup
 %{_datadir}/%{name}/getparams
@@ -366,7 +362,7 @@ fi
 %{_datadir}/%{name6}/helpers
 %{_datadir}/%{name6}/lib.*
 %{_datadir}/%{name6}/macro.*
-%{_datadir}/%{name6}/modules
+%{_datadir}/%{name6}/modules*
 %{_datadir}/%{name6}/version
 %{_datadir}/%{name6}/wait4ifup
 %{_mandir}/man5/%{name6}-accounting.5.*
@@ -414,10 +410,11 @@ fi
 %{_datadir}/%{name}-lite/configpath
 %{_datadir}/%{name}-lite/functions
 %{_datadir}/%{name}-lite/lib.*
-%{_datadir}/%{name}-lite/modules
+%{_datadir}/%{name}-lite/modules*
 %{_datadir}/%{name}-lite/shorecap
 %{_datadir}/%{name}-lite/version
 %{_datadir}/%{name}-lite/wait4ifup
+%{_datadir}/%{name}-lite/helpers
 %{_mandir}/man5/%{name}-lite*
 %{_mandir}/man8/%{name}-lite*
 
@@ -434,10 +431,11 @@ fi
 %{_datadir}/%{name6}-lite/configpath
 %{_datadir}/%{name6}-lite/functions
 %{_datadir}/%{name6}-lite/lib.*
-%{_datadir}/%{name6}-lite/modules
+%{_datadir}/%{name6}-lite/modules*
 %{_datadir}/%{name6}-lite/shorecap
 %{_datadir}/%{name6}-lite/version
 %{_datadir}/%{name6}-lite/wait4ifup
+%{_datadir}/%{name6}-lite/helpers
 %{_mandir}/man5/%{name6}-lite*
 %{_mandir}/man8/%{name6}-lite*
 
