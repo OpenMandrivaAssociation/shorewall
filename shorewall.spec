@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 19.1
+%define version_minor 23.1
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Servers
 URL:		http://www.shorewall.net/
@@ -29,8 +29,6 @@ Patch0:		%{name}-common-4.2.5-init-script.patch
 Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
-# shorewall 4.4.0 does not adds comments at the end of the file
-Patch4:		%{name}-4.4.17-comment.patch
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires:	dash
@@ -105,7 +103,6 @@ This package contains the docs.
 
 pushd %{name}-%{version_main}
 %patch0 -p1 -b .init
-%patch4 -p1 -b .comment
 popd
 
 pushd %{name}-lite-%{version_lite}
@@ -122,6 +119,11 @@ popd
 
 %build
 # (tpg) we do nothing here
+
+# (tpg) add comment to the configfiles
+for i in $(find -L configfiles  -type f);
+do echo "#LAST LINE -- DO NOT REMOVE" >> $i;
+done
 
 %install
 rm -rf %{buildroot}
@@ -372,6 +374,7 @@ fi
 %{_mandir}/man5/%{name6}-exclusion.5.*
 %{_mandir}/man5/%{name6}-hosts.5.*
 %{_mandir}/man5/%{name6}-interfaces.5.*
+%{_mandir}/man5/%{name6}-ipsets.5.*
 %{_mandir}/man5/%{name6}-maclist.5.*
 %{_mandir}/man5/%{name6}-modules.5.*
 %{_mandir}/man5/%{name6}-nesting.5.*
