@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://www.shorewall.net/
@@ -44,7 +44,7 @@ Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
-Requires(post):	systemd-sysv
+Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 
@@ -63,7 +63,7 @@ Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
-Requires(post):	systemd-sysv
+Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 Obsoletes:	%{name}-ipv6 < 4.4.24
@@ -80,7 +80,7 @@ Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
-Requires(post):	systemd-sysv
+Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 Obsoletes:	%{name}-ipv6-lite < 4.4.24
@@ -99,7 +99,7 @@ Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
-Requires(post):	systemd-sysv
+Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 
@@ -114,7 +114,7 @@ Requires:	NetworkManager
 Requires:	%{name} = %{version}-%{release}
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
-Requires(post):	systemd-sysv
+Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 
