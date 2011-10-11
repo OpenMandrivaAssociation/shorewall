@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 2
+Release:	%mkrel 4
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://www.shorewall.net/
@@ -26,7 +26,12 @@ Source3:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
 Source4:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
 Source5:	%ftp_path/%{name}-init-%{version_main}.tar.bz2
 Source6:	%ftp_path/%{sha1sums_ver}.sha1sums
-Patch4:		shorewall-4.4.24-systemd-after-network-target.patch
+# (tpg) ExecReload is not recognized by systemd, so remowe this
+Patch4:		shorewall-4.4.24-systemd-service.patch
+Patch5:		shorewall-lite-4.4.24-systemd-service.patch
+Patch6:		shorewall6-4.4.24-systemd-service.patch
+Patch7:		shorewall6-lite-4.4.24-systemd-service.patch
+Patch8:		shorewall-init-4.4.24-systemd-service.patch
 BuildConflicts:	apt-common
 BuildArch:	noarch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
@@ -141,6 +146,10 @@ This package contains the docs.
 %setup -q -c -n %{name}-%{version} -T -a0 -a1 -a2 -a3 -a4 -a5
 
 %patch4 -p0 -b .target
+%patch5 -p0 -b .target
+%patch6 -p0 -b .target
+%patch7 -p0 -b .target
+%patch8 -p0 -b .target
 
 %build
 # (tpg) we do nothing here
