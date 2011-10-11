@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 23.1
+%define version_minor 24
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -29,19 +29,26 @@ Patch0:		%{name}-common-4.2.5-init-script.patch
 Patch1:		%{name}-lite-4.2.5-init-script.patch
 Patch2:		%{name6}-4.2.5-init-script.patch
 Patch3:		%{name6}-lite-4.2.5-init-script.patch
+BuildConflicts:	apt-common
+BuildArch:	noarch
+BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
+BuildRequires:	perl
+BuildRequires:	systemd-units
+# since shorewall 4.4 we do not have common, shell and perl modules anymore
+Obsoletes:	shorewall-common
+Obsoletes:	shorewall-perl
+Obsoletes:	shorewall-shell
+Conflicts:	shorewall < 4.0.7-1
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires:	dash
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
-Conflicts:	shorewall < 4.0.7-1
-BuildConflicts:	apt-common
-BuildArch:	noarch
-BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
-# since shorewall 4.4 we do not have common, shell and perl modules anymore
-Obsoletes:	shorewall-common
-Obsoletes:	shorewall-perl
-Obsoletes:	shorewall-shell
+Requires(post):	/sbin/chkconfig
+Requires(post):	systemd-units
+Requires(post):	systemd-sysv
+Requires(preun):	systemd-units
+Requires(postun):	systemd-units
 
 %description
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
@@ -56,6 +63,11 @@ Requires:	iptables-ipv6
 Requires:	iproute2
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
+Requires(post):	/sbin/chkconfig
+Requires(post):	systemd-units
+Requires(post):	systemd-sysv
+Requires(preun):	systemd-units
+Requires(postun):	systemd-units
 
 %description ipv6
 An IPv6 enabled and capable Shoreline Firewall.
@@ -66,6 +78,11 @@ Group:		System/Servers
 Requires:	%{name}-ipv6 = %{version}-%{release}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
+Requires(post):	/sbin/chkconfig
+Requires(post):	systemd-units
+Requires(post):	systemd-sysv
+Requires(preun):	systemd-units
+Requires(postun):	systemd-units
 
 %description ipv6-lite
 Shorewall IPv6 Lite is a companion product to Shorewall IPv6 that allows 
@@ -78,6 +95,11 @@ Group:		System/Servers
 Requires:	%{name} = %{version}-%{release}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
+Requires(post):	/sbin/chkconfig
+Requires(post):	systemd-units
+Requires(post):	systemd-sysv
+Requires(preun):	systemd-units
+Requires(postun):	systemd-units
 
 %description lite
 Shorewall Lite is a companion product to Shorewall that allows network
@@ -95,33 +117,34 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 This package contains the docs.
 
 %prep
-%setup -q -c -n %{name}-%{version}
-%setup -q -T -D -a 1
-%setup -q -T -D -a 2
-%setup -q -T -D -a 3
-%setup -q -T -D -a 4
+#%setup -q -c -n %{name}-%{version}
+%setup -q -c -n %{name}-%{version} -T -a0 -a1 -a2 -a3 -a4
+#%setup -q -T -D -a 1
+#%setup -q -T -D -a 2
+#%setup -q -T -D -a 3
+#%setup -q -T -D -a 4
 
 pushd %{name}-%{version_main}
-%patch0 -p1 -b .init
+#%patch0 -p1 -b .init
 popd
 
 pushd %{name}-lite-%{version_lite}
-%patch1 -p1 -b .initlite
+#%patch1 -p1 -b .initlite
 popd
 
 pushd %{name6}-%{ipv6_ver}
-%patch2 -p1 -b .init6
+#%patch2 -p1 -b .init6
 popd
 
 pushd %{name6}-lite-%{ipv6_lite_ver}
-%patch3 -p1 -b .init6lite
+#%patch3 -p1 -b .init6lite
 popd
 
 %build
 # (tpg) we do nothing here
 
 # (tpg) add comment to the configfiles
-for i in $(find -L configfiles  -type f);
+for i in $(find -L $(find . -name configfiles -type d)  -type f);
 do echo "#LAST LINE -- DO NOT REMOVE" >> $i;
 done
 
@@ -154,6 +177,9 @@ perl -pi -e 's#DISABLE_IPV6=.*#DISABLE_IPV6=No#' configfiles/%{name}.conf
 
 # (tpg) set config path
 perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=configfiles/%{/g_sysconfdir}/%{name}#' configpath
+
+# (tpg) enable AUTOMAKE - skip comilation on start/restart if there were no changes in rules
+perl -pi -e 's/AUTOMAKE=.*/AUTOMAKE=Yes/' configfiles/%{name}.conf
 
 # let's do the install
 ./install.sh
@@ -378,6 +404,7 @@ fi
 %{_mandir}/man5/%{name6}-maclist.5.*
 %{_mandir}/man5/%{name6}-modules.5.*
 %{_mandir}/man5/%{name6}-nesting.5.*
+%{_mandir}/man5/%{name6}-netmap.5.*
 %{_mandir}/man5/%{name6}-notrack.5.*
 %{_mandir}/man5/%{name6}-params.5.*
 %{_mandir}/man5/%{name6}-policy.5.*
