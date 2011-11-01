@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 24
+%define version_minor 25
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 4
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://www.shorewall.net/
@@ -257,8 +257,10 @@ rm -rf %{buildroot}%{_datadir}/shorewall/configfiles
 rm -rf %{buildroot}
 
 %post
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+    /bin/systemctl enable shorewall.service >/dev/null 2>&1 || :
+    /bin/systemctl try-restart shorewall.service >/dev/null 2>&1 || :
 fi
 
 %create_ghostfile %{_var}/lib/%{name}/chains root root 644
