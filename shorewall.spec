@@ -152,7 +152,11 @@ rm -rf %{buildroot}
 export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
+%if %mdkver >= 201100
+export DEST=%{_unitdir}
+%else
 export DEST=%{_initrddir}
+%endif
 export CONFDIR=%{_sysconfdir}/%{name}
 
 pushd %{name}-%{version_main}
@@ -194,14 +198,20 @@ popd
 # let's do the install
 targets="shorewall shorewall-lite shorewall6 shorewall6-lite shorewall-init"
 
-mkdir -p %{buildroot}/lib/systemd/system
+%if %mdkver >= 201100
+mkdir -p %{buildroot}%{_unitdir}
 
 for i in $targets; do
     pushd ${i}-%{version}
 	./install.sh
-	install -m 644 ${i}.service %{buildroot}/lib/systemd/system
+	install -m 644 ${i}.service %{buildroot}%{_unitdir}
      popd
 done
+
+#(tpg) drop init files
+rm -rf %{buildroot}%{_initddir}
+
+%endif
 
 # Suppress automatic replacement of "echo" by "gprintf" in the shorewall
 # startup script by RPM. This automatic replacement is broken.
@@ -398,10 +408,13 @@ fi
 %ghost %{_var}/lib/%{name}/*
 %ghost %{_var}/lib/%{name}/.??*
 %config %{_sysconfdir}/logrotate.d/%{name}
-%attr(700,root,root) %{_initrddir}/%{name}
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/%{name}
-/lib/systemd/system/shorewall.service
+%if %mdkver >= 201100
+%{_unitdir}/shorewall.service
+%else
+%attr(700,root,root) %{_initrddir}/%{name}
+%endif
 %{_datadir}/%{name}/action*
 %{_datadir}/%{name}/configpath
 %{_datadir}/%{name}/functions
@@ -462,11 +475,14 @@ fi
 %dir %attr(755,root,root) %{_var}/lib/%{name6}
 %ghost %{_var}/lib/%{name6}/*
 %ghost %{_var}/lib/%{name6}/.??*
-%attr(700,root,root) %{_initrddir}/%{name6}
 %config(noreplace) %{_sysconfdir}/%{name6}/*
 %config %{_sysconfdir}/logrotate.d/%{name6}
 %attr(755,root,root) /sbin/%{name6}
-/lib/systemd/system/shorewall6.service
+%if %mdkver >= 201100
+%{_unitdir}/shorewall6.service
+%else
+%attr(700,root,root) %{_initrddir}/%{name6}
+%endif
 %{_datadir}/%{name6}/action*
 %{_datadir}/%{name}/prog.footer6
 %{_datadir}/%{name}/prog.header6
@@ -518,11 +534,14 @@ fi
 %dir %{_datadir}/%{name}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name}-lite
 %ghost %{_var}/lib/%{name}-lite/*
-%attr(700,root,root) %{_initrddir}/%{name}-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
 %config %{_sysconfdir}/logrotate.d/%{name}-lite
 %attr(755,root,root) /sbin/%{name}-lite
-/lib/systemd/system/shorewall-lite.service
+%if %mdkver >= 201100
+%{_unitdir}/shorewall-lite.service
+%else
+%attr(700,root,root) %{_initrddir}/%{name}-lite
+%endif
 %{_datadir}/%{name}-lite/configpath
 %{_datadir}/%{name}-lite/functions
 %{_datadir}/%{name}-lite/lib.*
@@ -540,11 +559,14 @@ fi
 %dir %{_datadir}/%{name6}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name6}-lite
 %ghost %{_var}/lib/%{name6}-lite/*
-%attr(700,root,root) %{_initrddir}/%{name6}-lite
 %config(noreplace) %{_sysconfdir}/%{name6}-lite/*
 %config %{_sysconfdir}/logrotate.d/%{name6}-lite
 %attr(755,root,root) /sbin/%{name6}-lite
-/lib/systemd/system/shorewall6-lite.service
+%if %mdkver >= 201100
+%{_unitdir}/shorewall6-lite.service
+%else
+%attr(700,root,root) %{_initrddir}/%{name6}-lite
+%endif
 %{_datadir}/%{name6}-lite/configpath
 %{_datadir}/%{name6}-lite/functions
 %{_datadir}/%{name6}-lite/lib.*
@@ -561,12 +583,14 @@ fi
 %doc shorewall-init-%{version}/{COPYING,changelog.txt,releasenotes.txt}
 %{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
 %config(noreplace) %{_sysconfdir}/sysconfig/shorewall-init
+%if %mdkver >= 201100
+%{_unitdir}/shorewall-init.service
+%else
 %attr(700,root,root) %{_initrddir}/%{name}-init
+%endif
 %{_datadir}/shorewall-init
-/lib/systemd/system/shorewall-init.service
 %{_mandir}/man8/%{name}-init.8.*
 
 %files doc
 %defattr(-,root,root)
 %doc %{name}-docs-html-%{version}/*
-
