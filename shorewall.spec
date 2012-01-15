@@ -197,21 +197,17 @@ popd
 
 # let's do the install
 targets="shorewall shorewall-lite shorewall6 shorewall6-lite shorewall-init"
-
-%if %mdkver >= 201100
 mkdir -p %{buildroot}%{_unitdir}
 
 for i in $targets; do
     pushd ${i}-%{version}
 	./install.sh
-	install -m 644 ${i}.service %{buildroot}%{_unitdir}
+	install -m 644 ${i}.service %{buildroot}%{_unitdir}/${i}.service
      popd
 done
 
 #(tpg) drop init files
 rm -rf %{buildroot}%{_initddir}
-
-%endif
 
 # Suppress automatic replacement of "echo" by "gprintf" in the shorewall
 # startup script by RPM. This automatic replacement is broken.
