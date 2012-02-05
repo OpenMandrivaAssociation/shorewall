@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.4
-%define version_minor 25
+%define version_minor 27.3
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -45,7 +45,6 @@ Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
 Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
-Requires(postun):	systemd-units
 
 %description
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
@@ -64,7 +63,6 @@ Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
 Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
-Requires(postun):	systemd-units
 Obsoletes:	%{name}-ipv6 < 4.4.24
 Provides:	%{name}-ipv6
 
@@ -81,7 +79,6 @@ Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
 Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
-Requires(postun):	systemd-units
 Obsoletes:	%{name}-ipv6-lite < 4.4.24
 Provides:	%{name}-ipv6-lite
 
@@ -100,7 +97,6 @@ Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
 Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
-Requires(postun):	systemd-units
 
 %description lite
 Shorewall Lite is a companion product to Shorewall that allows network
@@ -111,11 +107,12 @@ Summary:	Initialization functionality and NetworkManager integration for Shorewa
 Group:		System/Configuration/Networking
 Requires:	NetworkManager
 Requires:	%{name} = %{version}-%{release}
+Requires(post):	rpm-helper
+Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
 Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
-Requires(postun):	systemd-units
 
 %description init
 This package adds additional initialization functionality to Shorewall in two
@@ -152,11 +149,7 @@ rm -rf %{buildroot}
 export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
-%if %mdkver >= 201100
-export DEST=%{_unitdir}
-%else
 export DEST=%{_initrddir}
-%endif
 export CONFDIR=%{_sysconfdir}/%{name}
 
 pushd %{name}-%{version_main}
@@ -179,19 +172,25 @@ perl -pi -e 's/OPTIMIZE=.*/OPTIMIZE=1/' configfiles/%{name}.conf
 perl -pi -e 's#DISABLE_IPV6=.*#DISABLE_IPV6=No#' configfiles/%{name}.conf
 
 # (tpg) set config path
-perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=configfiles/%{/g_sysconfdir}/%{name}#' configpath
+#perl -pi -e 's#CONFIG_PATH=.*#CONFIG_PATH=configfiles/%{/g_sysconfdir}/%{name}#' configpath
 
 # (tpg) enable AUTOMAKE - skip comilation on start/restart if there were no changes in rules
 perl -pi -e 's/AUTOMAKE=.*/AUTOMAKE=Yes/' configfiles/%{name}.conf
+
+# (tpg) handle compressed modules (from mageia)
+perl -pi -e 's#MODULE_SUFFIX=.*#MODULE_SUFFIX="ko ko.gz"#' configfiles/%{name}.conf
 
 popd
 
 #(tpg) IPv6
 pushd %{name6}-%{ipv6_ver}
 # (blino) enable startup (new setting as of 2.1.3)
-perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' %{name6}.conf
+perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' configfiles/%{name6}.conf
 # Keep synced with net.ipv4.ip_forward var in /etc/sysctl.conf
-perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name6}.conf
+perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' configfiles/%{name6}.conf
+
+# (tpg) handle compressed modules (from mageia)
+perl -pi -e 's#MODULE_SUFFIX=.*#MODULE_SUFFIX="ko ko.gz"#' configfiles/%{name6}.conf
 
 popd
 
@@ -251,8 +250,9 @@ rm -rf %{buildroot}%{_datadir}/shorewall/configfiles
 rm -rf %{buildroot}
 
 %post
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -eq 1 ] ; then
+%_post_service shorewall
+
+if [ $1 = 1 ] ; then
     /bin/systemctl enable shorewall.service >/dev/null 2>&1 || :
     /bin/systemctl try-restart shorewall.service >/dev/null 2>&1 || :
 fi
@@ -273,41 +273,25 @@ fi
 %create_ghostfile %{_var}/lib/%{name}/.start root root 700
 
 %preun
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable shorewall.service > /dev/null 2>&1 || :
-    /bin/systemctl stop shorewall.service > /dev/null 2>&1 || :
-    %{__rm} -f %{_var}/lib/%{name}/*
-fi
+%_preun_service %{name}
 
-%postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart shorewall.service >/dev/null 2>&1 || :
+if [ $1 = 0 ] ; then
+    %{__rm} -f %{_sysconfdir}/%{name}/startup_disabled
+    %{__rm} -f %{_var}/lib/%{name}/*
 fi
 
 %triggerun -- shorewall < 4.4.23.1-2
 /sbin/chkconfig --del shorewall >/dev/null 2>&1 || :
 /bin/systemctl try-restart shorewall.service >/dev/null 2>&1 || :
 
-
 %post -n %{name}-lite
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-
+%_post_service %{name}-lite
 %create_ghostfile %{_var}/lib/%{name}-lite/firewall root root 644
 
 %preun -n %{name}-lite
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable shorewall-lite.service > /dev/null 2>&1 || :
-    /bin/systemctl stop shorewall-lite.service > /dev/null 2>&1 || :
+%_preun_service %{name}-lite
+if [ $1 = 0 ] ; then
     %{__rm} -f %{_var}/lib/%{name}-lite/*
-fi
-
-%postun -n %{name}-lite
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart shorewall-lite.service >/dev/null 2>&1 || :
 fi
 
 %triggerun -- shorewall-lite < 4.4.23.1-2
@@ -315,9 +299,7 @@ fi
 /bin/systemctl try-restart shorewall-lite.service >/dev/null 2>&1 || :
 
 %post -n %{name6}
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
+%_post_service %{name6}
 
 %create_ghostfile %{_var}/lib/%{name6}/chains root root 644
 %create_ghostfile %{_var}/lib/%{name6}/restarted root root 644
@@ -333,16 +315,11 @@ fi
 %create_ghostfile %{_var}/lib/%{name6}/.start root root 700
 
 %preun -n %{name6}
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable shorewall6.service > /dev/null 2>&1 || :
-    /bin/systemctl stop shorewall6.service > /dev/null 2>&1 || :
-    %{__rm} -f %{_var}/lib/%{name6}/*
-fi
+%_preun_service %{name6}
 
-%postun -n %{name6}
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart shorewall6.service >/dev/null 2>&1 || :
+if [ $1 = 0 ] ; then
+    %{__rm} -f %{_sysconfdir}/%{name6}/startup_disabled
+    %{__rm} -f %{_var}/lib/%{name6}/*
 fi
 
 %triggerun -- shorewall-ipv6 < 4.4.23.1-2
@@ -350,23 +327,14 @@ fi
 /bin/systemctl try-restart shorewall6.service >/dev/null 2>&1 || :
 
 %post -n %{name6}-lite
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-
+%_post_service %{name6}-lite
 %create_ghostfile %{_var}/lib/%{name6}-lite/firewall root root 644
 
 %preun -n %{name6}-lite
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable shorewall6-lite.service > /dev/null 2>&1 || :
-    /bin/systemctl stop shorewall6-lite.service > /dev/null 2>&1 || :
-    %{__rm} -f %{_var}/lib/%{name6}-lite/*
-fi
+%_preun_service %{name6}-lite
 
-%postun -n %{name6}-lite
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart shorewall6-lite.service >/dev/null 2>&1 || :
+if [ $1 = 0 ] ; then
+    %{__rm} -f %{_var}/lib/%{name6}-lite/*
 fi
 
 %triggerun -- shorewall-ipv6-lite < 4.4.23.1-2
@@ -374,21 +342,11 @@ fi
 /bin/systemctl try-restart shorewall6-lite.service >/dev/null 2>&1 || :
 
 %post -n %{name}-init
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
+%_post_service %{name}-init
 
 %preun -n %{name}-init
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable shorewall-init.service > /dev/null 2>&1 || :
-    /bin/systemctl stop shorewall-init.service > /dev/null 2>&1 || :
+if [ $1 = 0 ] ; then
     %{__rm} -f %{_var}/lib/%{name}-init/*
-fi
-
-%postun -n %{name}-init
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart shorewall-init.service >/dev/null 2>&1 || :
 fi
 
 %triggerun -- shorewall-init < 4.4.23.1-2
@@ -456,6 +414,7 @@ fi
 %{_mandir}/man5/%{name}-ipsets.5*
 %{_mandir}/man5/%{name}-routes.5*
 %{_mandir}/man5/%{name}-secmarks.5*
+%{_mandir}/man5/%{name}-blrules.5*
 %{_mandir}/man8/%{name}.8.*
 %dir %{_datadir}/shorewall/Shorewall
 %{_datadir}/shorewall/Shorewall/*.pm
@@ -522,6 +481,7 @@ fi
 %{_mandir}/man5/%{name6}-routes.5*
 %{_mandir}/man5/%{name6}-secmarks.5*
 %{_mandir}/man5/%{name6}-tcfilters.5*
+%{_mandir}/man5/%{name6}-blrules.5*
 %{_mandir}/man8/%{name6}.8.*
 
 %files lite
