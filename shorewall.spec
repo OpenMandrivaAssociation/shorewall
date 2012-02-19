@@ -15,7 +15,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://www.shorewall.net/
@@ -39,6 +39,7 @@ Conflicts:	shorewall < 4.0.7-1
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires:	dash
+Requires:	%{name}-init = %{version}-%{release}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
