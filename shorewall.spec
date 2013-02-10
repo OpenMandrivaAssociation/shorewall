@@ -27,6 +27,7 @@ Source3:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
 Source4:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
 Source5:	%ftp_path/%{name}-init-%{version_main}.tar.bz2
 Source6:	%ftp_path/%{sha1sums_ver}.sha1sums
+Source100:  shorewall.rpmlintrc
 BuildConflicts:	apt-common
 BuildArch:	noarch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
