@@ -1,4 +1,4 @@
 addFilter("E: non-readable")
 addFilter("E: non-standard-executable-perm")
 addFilter("E: unknown-lsb-keyword")
-setBadness("E: non-readable", 0)
+setOption("BadnessThreshold", 120)
