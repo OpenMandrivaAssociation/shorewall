@@ -16,7 +16,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	4
+Release:	5
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://www.shorewall.net/
