@@ -1,14 +1,12 @@
 %define debug_package %{nil}
-%define subrel 2
 
-%define version_major 4.4
-%define version_minor 25
+%define version_major 4.5
+%define version_minor 13
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
 %define ipv6_ver %{version}
 %define ipv6_lite_ver %{version}
-%define sha1sums_ver %{version_main}
 %define ftp_path ftp://ftp.shorewall.net/pub/shorewall/%{version_major}/%{name}-%{version}
 
 %define name6 %{name}6
@@ -16,7 +14,7 @@
 Summary:	Iptables-based firewall for Linux systems
 Name:		shorewall
 Version:	%{version}
-Release:	5
+Release:	1
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://www.shorewall.net/
@@ -26,11 +24,10 @@ Source2:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
 Source3:	%ftp_path/%{name6}-%{ipv6_ver}.tar.bz2
 Source4:	%ftp_path/%{name6}-lite-%{ipv6_lite_ver}.tar.bz2
 Source5:	%ftp_path/%{name}-init-%{version_main}.tar.bz2
-Source6:	%ftp_path/%{sha1sums_ver}.sha1sums
-Source100:  shorewall.rpmlintrc
+Source6:	%ftp_path/%{name}-core-%{version}.tar.bz2
+Source100:	shorewall.rpmlintrc
 BuildConflicts:	apt-common
 BuildArch:	noarch
-BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 BuildRequires:	perl
 BuildRequires:	systemd-units
 # since shorewall 4.4 we do not have common, shell and perl modules anymore
@@ -41,6 +38,7 @@ Conflicts:	shorewall < 4.0.7-1
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
 Requires:	dash
+Requires:	%{name}-core = %{EVRD}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
@@ -54,10 +52,21 @@ The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
 (iptables) based firewall that can be used on a dedicated firewall system,
 a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 
+%package core
+Summary:	Shorewall core libraries
+Group:		System/Configuration/Networking
+Requires:	%{name} = %{EVRD}
+Conflicts:	shorewall < 4.5
+Requires(post):	rpm-helper
+Requires(preun):	rpm-helper
+
+%description core
+An IPv6 enabled and capable Shoreline Firewall.
+
 %package -n %{name6}
 Summary:	IPv6 capable Shorewall
 Group:		System/Configuration/Networking
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name} = %{EVRD}
 Requires:	iptables-ipv6
 Requires:	iproute2
 Requires(post):	rpm-helper
@@ -76,7 +85,7 @@ An IPv6 enabled and capable Shoreline Firewall.
 %package -n %{name6}-lite
 Summary:	Lite version of ipv6 shorewall
 Group:		System/Configuration/Networking
-Requires:	%{name6} = %{version}-%{release}
+Requires:	%{name6} = %{EVRD}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
@@ -95,7 +104,7 @@ firewalls.
 %package lite
 Summary:	Lite version of shorewall
 Group:		System/Configuration/Networking
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name} = %{EVRD}
 Requires(post):	rpm-helper
 Requires(preun):	rpm-helper
 Requires(post):	/sbin/chkconfig
@@ -112,7 +121,7 @@ administrators to centralize the configuration of Shorewall-based firewalls.
 Summary:	Initialization functionality and NetworkManager integration for Shorewall
 Group:		System/Configuration/Networking
 Requires:	NetworkManager
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name} = %{EVRD}
 Requires(post):	/sbin/chkconfig
 Requires(post):	systemd-units
 Requires(post):	systemd-sysvinit
@@ -139,7 +148,7 @@ a multi-function gateway/ router/server or on a standalone GNU/Linux system.
 This package contains the docs.
 
 %prep
-%setup -q -c -n %{name}-%{version} -T -a0 -a1 -a2 -a3 -a4 -a5
+%setup -q -c -n %{name}-%{version} -T -a0 -a1 -a2 -a3 -a4 -a5 -a6
 
 %build
 # (tpg) we do nothing here
@@ -150,12 +159,15 @@ do echo "#LAST LINE -- DO NOT REMOVE" >> $i;
 done
 
 %install
-rm -rf %{buildroot}
 export PREFIX=%{buildroot}
 export OWNER=`id -n -u`
 export GROUP=`id -n -g`
-export DEST=%{_initrddir}
 export CONFDIR=%{_sysconfdir}/%{name}
+export SYSTEMD=%{_unitdir}
+export SBINDIR=%{_sbindir}
+export LIBEXEC=%{_libexecdir}
+export DESTDIR=%{buildroot}
+
 
 pushd %{name}-%{version_main}
 # (blino) enable startup (new setting as of 2.1.3)
@@ -187,23 +199,26 @@ popd
 #(tpg) IPv6
 pushd %{name6}-%{ipv6_ver}
 # (blino) enable startup (new setting as of 2.1.3)
-perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' %{name6}.conf
+perl -pi -e 's/STARTUP_ENABLED=.*/STARTUP_ENABLED=Yes/' configfiles/%{name6}.conf
 # Keep synced with net.ipv4.ip_forward var in /etc/sysctl.conf
-perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' %{name6}.conf
+perl -pi -e 's/IP_FORWARDING=.*/IP_FORWARDING=Keep/' configfiles/%{name6}.conf
 
 popd
 
 # let's do the install
-targets="shorewall shorewall-lite shorewall6 shorewall6-lite shorewall-init"
+targets="shorewall-core shorewall shorewall-lite shorewall6 shorewall6-lite shorewall-init"
 
-mkdir -p %{buildroot}/lib/systemd/system
+mkdir -p %{buildroot}%{_unitdir}
 
 for i in $targets; do
     pushd ${i}-%{version}
-	./install.sh
-	install -m 644 ${i}.service %{buildroot}/lib/systemd/system
+	./configure.pl
+	./install.sh shorewallrc.redhat
+	if [ $i != "%{name}-core" ]; then
+	install -m 644 *.service %{buildroot}%{_unitdir}
+	fi;
      popd
-done
+done ;
 
 # Suppress automatic replacement of "echo" by "gprintf" in the shorewall
 # startup script by RPM. This automatic replacement is broken.
@@ -242,9 +257,6 @@ EOF
 # due to the removal of the %%exclude macro...
 rm -rf %{buildroot}%{_datadir}/%{name6}/configfiles
 rm -rf %{buildroot}%{_datadir}/shorewall/configfiles
-
-%clean
-rm -rf %{buildroot}
 
 %post
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
@@ -392,7 +404,6 @@ fi
 /bin/systemctl try-restart shorewall-init.service >/dev/null 2>&1 || :
 
 %files
-%defattr(-,root,root)
 %doc README.4.4.0.upgrade.urpmi %{name}-%{version_main}/{changelog.txt,releasenotes.txt,Samples}
 %dir %{_sysconfdir}/%{name}
 %dir %{_datadir}/%{name}
@@ -403,7 +414,7 @@ fi
 %attr(700,root,root) %{_initrddir}/%{name}
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/%{name}
-/lib/systemd/system/shorewall.service
+%{_unitdir}/shorewall.service
 %{_datadir}/%{name}/action*
 %{_datadir}/%{name}/configpath
 %{_datadir}/%{name}/functions
@@ -412,8 +423,8 @@ fi
 %{_datadir}/%{name}/macro.*
 %{_datadir}/%{name}/modules*
 %{_datadir}/%{name}/version
-%{_datadir}/%{name}/wait4ifup
-%{_datadir}/%{name}/getparams
+%{_libexecdir}/%{name}/wait4ifup
+%{_libexecdir}/%{name}/getparams
 %{_mandir}/man5/%{name}-accounting.5.*
 %{_mandir}/man5/%{name}-actions.5.*
 %{_mandir}/man5/%{name}-blacklist.5.*
@@ -426,13 +437,13 @@ fi
 %{_mandir}/man5/%{name}-modules.5.*
 %{_mandir}/man5/%{name}-nat.5.*
 %{_mandir}/man5/%{name}-nesting.5.*
-%{_mandir}/man5/%{name}-notrack.5.*
+#%{_mandir}/man5/%{name}-notrack.5.*
 %{_mandir}/man5/%{name}-netmap.5.*
 %{_mandir}/man5/%{name}-params.5.*
 %{_mandir}/man5/%{name}-policy.5.*
 %{_mandir}/man5/%{name}-providers.5.*
 %{_mandir}/man5/%{name}-proxyarp.5.*
-%{_mandir}/man5/%{name}-route_rules.5.*
+#%{_mandir}/man5/%{name}-route_rules.5.*
 %{_mandir}/man5/%{name}-routestopped.5.*
 %{_mandir}/man5/%{name}-rules.5.*
 %{_mandir}/man5/%{name}-tcclasses.5.*
@@ -450,14 +461,13 @@ fi
 %{_mandir}/man5/%{name}-routes.5*
 %{_mandir}/man5/%{name}-secmarks.5*
 %{_mandir}/man8/%{name}.8.*
-%dir %{_datadir}/shorewall/Shorewall
-%{_datadir}/shorewall/Shorewall/*.pm
-%{_datadir}/shorewall/compiler.pl
-%{_datadir}/shorewall/prog.footer
-%{_datadir}/shorewall/prog.header
+%dir %{_datadir}/%{name}/Shorewall
+#%{_datadir}/shorewall/Shorewall/*.pm
+%{_libexecdir}/%{name}/compiler.pl
+%{_datadir}/%{name}/prog.footer
+#%{_datadir}/shorewall/prog.header
 
 %files -n %{name6}
-%defattr(-,root,root)
 %doc %{name6}-%{ipv6_ver}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples6}
 %dir %{_sysconfdir}/%{name6}
 %dir %{_datadir}/%{name6}
@@ -468,7 +478,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name6}/*
 %config %{_sysconfdir}/logrotate.d/%{name6}
 %attr(755,root,root) /sbin/%{name6}
-/lib/systemd/system/shorewall6.service
+%{_unitdir}shorewall6.service
 %{_datadir}/%{name6}/action*
 %{_datadir}/%{name}/prog.footer6
 %{_datadir}/%{name}/prog.header6
@@ -514,8 +524,17 @@ fi
 %{_mandir}/man5/%{name6}-tcfilters.5*
 %{_mandir}/man8/%{name6}.8.*
 
+%files core
+%doc %{name}-core-%{version}/*.txt
+%dir %{_datadir}/shorewall/
+%{_datadir}/shorewall/coreversion
+%{_datadir}/shorewall/functions
+%{_datadir}/shorewall/lib.base
+%{_datadir}/shorewall/lib.cli
+%{_datadir}/shorewall/lib.common
+%{_datadir}/shorewall/shorewallrc
+
 %files lite
-%defattr(-,root,root)
 %doc %{name}-lite-%{version_lite}/*.txt
 %dir %{_datadir}/%{name}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name}-lite
@@ -524,7 +543,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
 %config %{_sysconfdir}/logrotate.d/%{name}-lite
 %attr(755,root,root) /sbin/%{name}-lite
-/lib/systemd/system/shorewall-lite.service
+%{_unitdir}/shorewall-lite.service
 %{_datadir}/%{name}-lite/configpath
 %{_datadir}/%{name}-lite/functions
 %{_datadir}/%{name}-lite/lib.*
@@ -537,7 +556,6 @@ fi
 %{_mandir}/man8/%{name}-lite*
 
 %files -n %{name6}-lite
-%defattr(-,root,root)
 %doc %{name6}-lite-%{ipv6_lite_ver}/*.txt
 %dir %{_datadir}/%{name6}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name6}-lite
@@ -546,7 +564,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name6}-lite/*
 %config %{_sysconfdir}/logrotate.d/%{name6}-lite
 %attr(755,root,root) /sbin/%{name6}-lite
-/lib/systemd/system/shorewall6-lite.service
+%{_unitdir}/shorewall6-lite.service
 %{_datadir}/%{name6}-lite/configpath
 %{_datadir}/%{name6}-lite/functions
 %{_datadir}/%{name6}-lite/lib.*
@@ -559,17 +577,15 @@ fi
 %{_mandir}/man8/%{name6}-lite*
 
 %files init
-%defattr(-,root,root)
 %doc shorewall-init-%{version}/{COPYING,changelog.txt,releasenotes.txt}
 %{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
 %config(noreplace) %{_sysconfdir}/sysconfig/shorewall-init
 %attr(700,root,root) %{_initrddir}/%{name}-init
 %{_datadir}/shorewall-init
-/lib/systemd/system/shorewall-init.service
+%{_unitdir}/shorewall-init.service
 %{_mandir}/man8/%{name}-init.8.*
 
 %files doc
-%defattr(-,root,root)
 %doc %{name}-docs-html-%{version}/*
 
 

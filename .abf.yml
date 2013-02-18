@@ -1,7 +1,9 @@
+---
 sources:
-  "shorewall-4.4.25.tar.bz2": 6558178b0c1d83065b288e38d522da4379ea7ca9
-  "shorewall-docs-html-4.4.25.tar.bz2": 20eb574732497ea96bb15204f576573cdf2f73fb
-  "shorewall-init-4.4.25.tar.bz2": 32228bf1163f934997e848edfd017013ebef33ad
-  "shorewall-lite-4.4.25.tar.bz2": 3595141a7af9a8e96a15129c037b42aa31498ecc
-  "shorewall6-4.4.25.tar.bz2": 7edbe051f5f384db6ce17a4d3f57a88352c41b94
-  "shorewall6-lite-4.4.25.tar.bz2": 445a976654957fc516e512a1a63c75321889b605
+  shorewall-4.5.13.tar.bz2: 25409687a8da052dda2b7d334bba28c6e1c23278
+  shorewall-core-4.5.13.tar.bz2: 6a1ced48ee640b9e9bfc1647f70ffe7d27960ede
+  shorewall-docs-html-4.5.13.tar.bz2: 112bc05e5268e3da76b7fd6ee075deaac1496b24
+  shorewall-init-4.5.13.tar.bz2: 590e75ac643453c71be5aa5077daaa548ea78abc
+  shorewall-lite-4.5.13.tar.bz2: 9c8043c0388087e33e3f34b6c480f1539cd1094e
+  shorewall6-4.5.13.tar.bz2: be8355e940274072a032d70e34f6bfb4b4756d95
+  shorewall6-lite-4.5.13.tar.bz2: ee69ac4a6f84f3785cafcc06572ad0a5230f40b8
