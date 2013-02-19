@@ -30,10 +30,14 @@ BuildConflicts:	apt-common
 BuildArch:	noarch
 BuildRequires:	perl
 BuildRequires:	systemd-units
+BuildRequires:	perl(Digest::SHA1)
 # since shorewall 4.4 we do not have common, shell and perl modules anymore
-Obsoletes:	shorewall-common
-Obsoletes:	shorewall-perl
-Obsoletes:	shorewall-shell
+Obsoletes:	shorewall-common < 4.5
+Obsoletes:	shorewall-perl < 4.5
+Obsoletes:	shorewall-shell < 4.5
+Provides:	shorewall-common = %{version}
+Provides:	shorewall-perl = %{version}
+Provides:	shorewall-shell = %{version}
 Conflicts:	shorewall < 4.0.7-1
 Requires:	iptables >= 1.4.1
 Requires:	iproute2
@@ -77,7 +81,7 @@ Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 Obsoletes:	%{name}-ipv6 < 4.4.24
-Provides:	%{name}-ipv6
+Provides:	%{name}-ipv6 = %{version}
 
 %description -n %{name6}
 An IPv6 enabled and capable Shoreline Firewall.
@@ -94,7 +98,7 @@ Requires(post):	systemd-sysvinit
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 Obsoletes:	%{name}-ipv6-lite < 4.4.24
-Provides:	%{name}-ipv6-lite
+Provides:	%{name}-ipv6-lite = %{version}
 
 %description -n %{name6}-lite
 Shorewall IPv6 Lite is a companion product to Shorewall IPv6 that allows 
@@ -139,6 +143,7 @@ for 'event-driven' startup and shutdown.
 %package doc
 Summary:	Firewall scripts
 Group:		Books/Computer books
+Requires:	%{name} = %{EVRD}
 
 %description doc
 The Shoreline Firewall, more commonly known as "Shorewall", is a Netfilter
@@ -207,13 +212,19 @@ popd
 
 # let's do the install
 targets="shorewall-core shorewall shorewall-lite shorewall6 shorewall6-lite shorewall-init"
+use_rc="shorewallrc.default"
 
 mkdir -p %{buildroot}%{_unitdir}
 
 for i in $targets; do
     pushd ${i}-%{version}
+# (tpg) few corrections
+	sed -i -e 's@MANDIR=.*@MANDIR=%{_mandir}@' \
+	-e 's@INITDIR=.*@INITDIR=%{_initddir}@' \
+	-e 's@SYSCONFDIR=.*@SYSCONFDIR=%{_sysconfdir}/sysconfig@' $use_rc
+
 	./configure.pl
-	./install.sh shorewallrc.redhat
+	./install.sh $use_rc
 	if [ $i != "%{name}-core" ]; then
 	install -m 644 *.service %{buildroot}%{_unitdir}
 	fi;
@@ -257,6 +268,9 @@ EOF
 # due to the removal of the %%exclude macro...
 rm -rf %{buildroot}%{_datadir}/%{name6}/configfiles
 rm -rf %{buildroot}%{_datadir}/shorewall/configfiles
+
+# (tpg) remove old initscripts
+rm -rf %{buildroot}%{_initrddir}
 
 %post
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
@@ -411,20 +425,18 @@ fi
 %ghost %{_var}/lib/%{name}/*
 %ghost %{_var}/lib/%{name}/.??*
 %config %{_sysconfdir}/logrotate.d/%{name}
-%attr(700,root,root) %{_initrddir}/%{name}
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/*
 %attr(755,root,root) /sbin/%{name}
 %{_unitdir}/shorewall.service
 %{_datadir}/%{name}/action*
 %{_datadir}/%{name}/configpath
-%{_datadir}/%{name}/functions
 %{_datadir}/%{name}/helpers
-%{_datadir}/%{name}/lib.*
+%{_datadir}/%{name}/lib.cli-std
+%{_datadir}/%{name}/lib.core
 %{_datadir}/%{name}/macro.*
 %{_datadir}/%{name}/modules*
 %{_datadir}/%{name}/version
-%{_libexecdir}/%{name}/wait4ifup
-%{_libexecdir}/%{name}/getparams
+%{_datadir}/%{name}/getparams
 %{_mandir}/man5/%{name}-accounting.5.*
 %{_mandir}/man5/%{name}-actions.5.*
 %{_mandir}/man5/%{name}-blacklist.5.*
@@ -437,13 +449,11 @@ fi
 %{_mandir}/man5/%{name}-modules.5.*
 %{_mandir}/man5/%{name}-nat.5.*
 %{_mandir}/man5/%{name}-nesting.5.*
-#%{_mandir}/man5/%{name}-notrack.5.*
 %{_mandir}/man5/%{name}-netmap.5.*
 %{_mandir}/man5/%{name}-params.5.*
 %{_mandir}/man5/%{name}-policy.5.*
 %{_mandir}/man5/%{name}-providers.5.*
 %{_mandir}/man5/%{name}-proxyarp.5.*
-#%{_mandir}/man5/%{name}-route_rules.5.*
 %{_mandir}/man5/%{name}-routestopped.5.*
 %{_mandir}/man5/%{name}-rules.5.*
 %{_mandir}/man5/%{name}-tcclasses.5.*
@@ -460,12 +470,16 @@ fi
 %{_mandir}/man5/%{name}-ipsets.5*
 %{_mandir}/man5/%{name}-routes.5*
 %{_mandir}/man5/%{name}-secmarks.5*
+%{_mandir}/man5/%{name}-arprules.5.*
+%{_mandir}/man5/%{name}-blrules.5.*
+%{_mandir}/man5/%{name}-conntrack.5.*
+%{_mandir}/man5/%{name}-rtrules.5.*
+%{_mandir}/man5/%{name}-stoppedrules.5.*
 %{_mandir}/man8/%{name}.8.*
 %dir %{_datadir}/%{name}/Shorewall
-#%{_datadir}/shorewall/Shorewall/*.pm
-%{_libexecdir}/%{name}/compiler.pl
+%{_datadir}/shorewall/Shorewall/*.pm
+%{_datadir}/%{name}/compiler.pl
 %{_datadir}/%{name}/prog.footer
-#%{_datadir}/shorewall/prog.header
 
 %files -n %{name6}
 %doc %{name6}-%{ipv6_ver}/{changelog.txt,releasenotes.txt,tunnel,ipsecvpn,Samples6}
@@ -474,14 +488,11 @@ fi
 %dir %attr(755,root,root) %{_var}/lib/%{name6}
 %ghost %{_var}/lib/%{name6}/*
 %ghost %{_var}/lib/%{name6}/.??*
-%attr(700,root,root) %{_initrddir}/%{name6}
 %config(noreplace) %{_sysconfdir}/%{name6}/*
 %config %{_sysconfdir}/logrotate.d/%{name6}
 %attr(755,root,root) /sbin/%{name6}
-%{_unitdir}shorewall6.service
+%{_unitdir}/shorewall6.service
 %{_datadir}/%{name6}/action*
-%{_datadir}/%{name}/prog.footer6
-%{_datadir}/%{name}/prog.header6
 %{_datadir}/%{name6}/configpath
 %{_datadir}/%{name6}/functions
 %{_datadir}/%{name6}/helpers
@@ -489,7 +500,6 @@ fi
 %{_datadir}/%{name6}/macro.*
 %{_datadir}/%{name6}/modules*
 %{_datadir}/%{name6}/version
-%{_datadir}/%{name6}/wait4ifup
 %{_mandir}/man5/%{name6}-accounting.5.*
 %{_mandir}/man5/%{name6}-actions.5.*
 %{_mandir}/man5/%{name6}-blacklist.5.*
@@ -501,11 +511,9 @@ fi
 %{_mandir}/man5/%{name6}-modules.5.*
 %{_mandir}/man5/%{name6}-nesting.5.*
 %{_mandir}/man5/%{name6}-netmap.5.*
-%{_mandir}/man5/%{name6}-notrack.5.*
 %{_mandir}/man5/%{name6}-params.5.*
 %{_mandir}/man5/%{name6}-policy.5.*
 %{_mandir}/man5/%{name6}-providers.5.*
-%{_mandir}/man5/%{name6}-route_rules.5.*
 %{_mandir}/man5/%{name6}-routestopped.5.*
 %{_mandir}/man5/%{name6}-rules.5.*
 %{_mandir}/man5/%{name6}-tcclasses.5.*
@@ -522,6 +530,10 @@ fi
 %{_mandir}/man5/%{name6}-routes.5*
 %{_mandir}/man5/%{name6}-secmarks.5*
 %{_mandir}/man5/%{name6}-tcfilters.5*
+%{_mandir}/man5/%{name6}-blrules.5.*
+%{_mandir}/man5/%{name6}-conntrack.5.*
+%{_mandir}/man5/%{name6}-rtrules.5.*
+%{_mandir}/man5/%{name6}-stoppedrules.5.*
 %{_mandir}/man8/%{name6}.8.*
 
 %files core
@@ -533,13 +545,13 @@ fi
 %{_datadir}/shorewall/lib.cli
 %{_datadir}/shorewall/lib.common
 %{_datadir}/shorewall/shorewallrc
+%{_datadir}/%{name}/wait4ifup
 
 %files lite
 %doc %{name}-lite-%{version_lite}/*.txt
 %dir %{_datadir}/%{name}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name}-lite
 %ghost %{_var}/lib/%{name}-lite/*
-%attr(700,root,root) %{_initrddir}/%{name}-lite
 %config(noreplace) %{_sysconfdir}/%{name}-lite/*
 %config %{_sysconfdir}/logrotate.d/%{name}-lite
 %attr(755,root,root) /sbin/%{name}-lite
@@ -550,7 +562,6 @@ fi
 %{_datadir}/%{name}-lite/modules*
 %{_datadir}/%{name}-lite/shorecap
 %{_datadir}/%{name}-lite/version
-%{_datadir}/%{name}-lite/wait4ifup
 %{_datadir}/%{name}-lite/helpers
 %{_mandir}/man5/%{name}-lite*
 %{_mandir}/man8/%{name}-lite*
@@ -560,7 +571,6 @@ fi
 %dir %{_datadir}/%{name6}-lite
 %dir %attr(755,root,root) %{_var}/lib/%{name6}-lite
 %ghost %{_var}/lib/%{name6}-lite/*
-%attr(700,root,root) %{_initrddir}/%{name6}-lite
 %config(noreplace) %{_sysconfdir}/%{name6}-lite/*
 %config %{_sysconfdir}/logrotate.d/%{name6}-lite
 %attr(755,root,root) /sbin/%{name6}-lite
@@ -571,23 +581,21 @@ fi
 %{_datadir}/%{name6}-lite/modules*
 %{_datadir}/%{name6}-lite/shorecap
 %{_datadir}/%{name6}-lite/version
-%{_datadir}/%{name6}-lite/wait4ifup
 %{_datadir}/%{name6}-lite/helpers
 %{_mandir}/man5/%{name6}-lite*
 %{_mandir}/man8/%{name6}-lite*
 
 %files init
-%doc shorewall-init-%{version}/{COPYING,changelog.txt,releasenotes.txt}
+%doc shorewall-init-%{version}/*.txt
 %{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
-%config(noreplace) %{_sysconfdir}/sysconfig/shorewall-init
-%attr(700,root,root) %{_initrddir}/%{name}-init
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}-init
+%config %{_sysconfdir}/logrotate.d/%{name}-init
 %{_datadir}/shorewall-init
 %{_unitdir}/shorewall-init.service
 %{_mandir}/man8/%{name}-init.8.*
 
 %files doc
 %doc %{name}-docs-html-%{version}/*
-
 
 
 %changelog
