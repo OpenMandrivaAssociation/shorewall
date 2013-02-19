@@ -30,6 +30,7 @@ BuildConflicts:	apt-common
 BuildArch:	noarch
 BuildRequires:	perl
 BuildRequires:	systemd-units
+BuildRequires:	perl(Digest::SHA1)
 # since shorewall 4.4 we do not have common, shell and perl modules anymore
 Obsoletes:	shorewall-common
 Obsoletes:	shorewall-perl
