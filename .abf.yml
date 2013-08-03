@@ -1,5 +1,4 @@
----
-sources:
+removed_sources:
   shorewall-4.5.13.tar.bz2: 25409687a8da052dda2b7d334bba28c6e1c23278
   shorewall-core-4.5.13.tar.bz2: 6a1ced48ee640b9e9bfc1647f70ffe7d27960ede
   shorewall-docs-html-4.5.13.tar.bz2: 112bc05e5268e3da76b7fd6ee075deaac1496b24
@@ -7,3 +6,11 @@ sources:
   shorewall-lite-4.5.13.tar.bz2: 9c8043c0388087e33e3f34b6c480f1539cd1094e
   shorewall6-4.5.13.tar.bz2: be8355e940274072a032d70e34f6bfb4b4756d95
   shorewall6-lite-4.5.13.tar.bz2: ee69ac4a6f84f3785cafcc06572ad0a5230f40b8
+sources:
+  shorewall-4.5.18.tar.bz2: 5b426ae0455dacc41e86f874af4419d57fb265d2
+  shorewall-core-4.5.18.tar.bz2: bcbc0a638910e386b4c1408991695354734fcdd8
+  shorewall-docs-html-4.5.18.tar.bz2: 08c56d97c13a1a90369fa44367e65b556160c1c5
+  shorewall-init-4.5.18.tar.bz2: 6729bccd24687cd84fdda4753d9b366f84746bbe
+  shorewall-lite-4.5.18.tar.bz2: 0cbce32b921e72d97d14e35ce0dc4975ea10d8e5
+  shorewall6-4.5.18.tar.bz2: cdf3568fbbd753fad6349f25892f9ac846cb0b03
+  shorewall6-lite-4.5.18.tar.bz2: 54be8faab18cb99a2ace1f64baff60895d3bc3f1

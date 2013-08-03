@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.5
-%define version_minor 13
+%define version_minor 18
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
@@ -520,6 +520,7 @@ fi
 %{_mandir}/man5/%{name6}-tcdevices.5.*
 %{_mandir}/man5/%{name6}-tcinterfaces.5.*
 %{_mandir}/man5/%{name6}-tcpri.5.*
+%{_mandir}/man5/%{name6}-masq.5.*
 %{_mandir}/man5/%{name6}-tcrules.5.*
 %{_mandir}/man5/%{name6}-tos.5.*
 %{_mandir}/man5/%{name6}-tunnels.5.*
