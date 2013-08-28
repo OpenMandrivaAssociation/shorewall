@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 %define version_major 4.5
-%define version_minor 18
+%define version_minor 19
 %define version %{version_major}.%{version_minor}
 %define version_main %{version}
 %define version_lite %{version}
