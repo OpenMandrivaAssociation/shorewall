@@ -17,7 +17,7 @@ Version:	%{version}
 Release:	5
 License:	GPLv2+
 Group:		System/Configuration/Networking
-URL:		http://www.shorewall.net/
+URL:		https://www.shorewall.net/
 Source0:	%ftp_path/%{name}-%{version_main}.tar.bz2
 Source1:	%ftp_path/%{name}-lite-%{version_lite}.tar.bz2
 Source2:	%ftp_path/%{name}-docs-html-%{version}.tar.bz2
